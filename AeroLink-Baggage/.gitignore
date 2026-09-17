@@ -1,0 +1,28 @@
+## .NET build output
+bin/
+obj/
+out/
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+## SQLite local db files
+*.db
+*.db-shm
+*.db-wal
+
+## Environment / secrets
+appsettings.Development.json
+appsettings.Local.json
+.env
+
+## OS junk
+.DS_Store
+Thumbs.db
+
+## Test results
+TestResults/
+*.trx
