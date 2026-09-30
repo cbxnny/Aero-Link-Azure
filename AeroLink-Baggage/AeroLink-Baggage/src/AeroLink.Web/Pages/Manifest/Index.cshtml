@@ -1,0 +1,84 @@
+@page
+@model AeroLink.Web.Pages.Manifest.IndexModel
+@{
+    ViewData["Title"] = "Baggage Manifest";
+}
+
+<div class="card">
+    <h1>Baggage Manifest</h1>
+    <p>Select a departure flight to view its expected baggage manifest.</p>
+
+    <form method="get">
+        <label for="FlightId">Departure flight</label>
+        <select id="FlightId" name="FlightId" onchange="this.form.submit()">
+            <option value="">-- select a flight --</option>
+            @foreach (var flight in Model.Flights)
+            {
+                <option value="@flight.FlightId" selected="@(flight.FlightId == Model.FlightId)">
+                    @flight.FlightLabel &middot; @flight.FlightNumber &middot; @flight.DepartureAirport &rarr; @flight.ArrivalAirport
+                    (@flight.ScheduledDepartureUtc.ToString("HH:mm 'UTC'"))
+                </option>
+            }
+        </select>
+        <noscript><button class="btn" type="submit">Load manifest</button></noscript>
+    </form>
+</div>
+
+@if (Model.FlightId.HasValue && Model.SelectedFlight is null)
+{
+    <div class="alert-error">No flight found for the selected flight.</div>
+}
+
+@if (Model.SelectedFlight is not null)
+{
+    var flight = Model.SelectedFlight;
+    var loadedCount = flight.Bags.Count(b => b.IsLoaded);
+
+    <div class="card">
+        <h2>@flight.FlightLabel &middot; @flight.FlightNumber (@flight.DepartureAirport &rarr; @flight.ArrivalAirport)</h2>
+        <p>
+            Expected bags: <strong>@flight.Bags.Count</strong> &middot;
+            Loaded: <strong>@loadedCount</strong> &middot;
+            Outstanding: <strong>@(flight.Bags.Count - loadedCount)</strong>
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Bag tag</th>
+                    <th>Handling type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var bag in flight.Bags.OrderBy(b => b.Tag))
+                {
+                    <tr>
+                        <td>@bag.Tag</td>
+                        <td>
+                            @bag.HandlingType
+                            @if (bag.IsSpecialHandling)
+                            {
+                                <span class="badge badge-special">Special</span>
+                            }
+                        </td>
+                        <td>
+                            @if (bag.IsLoaded)
+                            {
+                                <span class="badge badge-loaded">Loaded</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-pending">@bag.Outcome</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <p style="margin-top:1rem;">
+            <a class="btn" href="/BagVerification/Verify?flightId=@flight.FlightId">Go to bag verification &rarr;</a>
+        </p>
+    </div>
+}

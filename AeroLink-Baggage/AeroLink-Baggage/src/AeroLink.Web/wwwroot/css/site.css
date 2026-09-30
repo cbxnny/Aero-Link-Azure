@@ -1,0 +1,127 @@
+:root {
+  --navy: #10243e;
+  --amber: #e8a33d;
+  --bg: #f6f7f9;
+  --border: #d9dee5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: #1c2733;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--navy);
+  color: white;
+  padding: 0.9rem 1.5rem;
+}
+
+.site-header .brand {
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+
+.site-header nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 1.25rem;
+  opacity: 0.85;
+}
+
+.site-header nav a:hover { opacity: 1; }
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 3rem;
+}
+
+.site-footer {
+  text-align: center;
+  color: #6b7684;
+  font-size: 0.85rem;
+  padding: 1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid var(--border);
+}
+
+th, td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+th {
+  background: #eef1f5;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.badge-pending { background: #f0e2c0; color: #7a5a0a; }
+.badge-loaded { background: #d7ecd9; color: #1e6b2a; }
+.badge-special { background: #fde3e3; color: #a3241e; }
+
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.btn {
+  background: var(--navy);
+  color: white;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:hover { background: #163457; }
+
+.alert-error {
+  background: #fde3e3;
+  color: #8a1f1f;
+  border: 1px solid #f2b8b8;
+  padding: 0.6rem 0.9rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.alert-success {
+  background: #dcf1de;
+  color: #1e5c26;
+  border: 1px solid #b6e0bb;
+  padding: 0.6rem 0.9rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+label { display: block; margin-bottom: 0.3rem; font-weight: 600; }
+input[type=text], select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}

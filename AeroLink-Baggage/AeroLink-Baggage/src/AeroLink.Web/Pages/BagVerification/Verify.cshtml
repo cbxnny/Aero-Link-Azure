@@ -1,0 +1,79 @@
+@page
+@model AeroLink.Web.Pages.BagVerification.VerifyModel
+@{
+    ViewData["Title"] = "Verify Bag";
+}
+
+<div class="card">
+    <h1>Verify Bag Tag</h1>
+    <p>Enter a bag tag to check it against the selected flight's manifest before confirming loading.</p>
+
+    @if (!ModelState.IsValid)
+    {
+        <div class="alert-error">
+            @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post">
+        <label for="FlightId">Departure flight</label>
+        <select id="FlightId" name="FlightId" asp-for="FlightId">
+            <option value="">-- select a flight --</option>
+            @foreach (var flight in Model.Flights)
+            {
+                <option value="@flight.FlightId" selected="@(flight.FlightId == Model.FlightId)">
+                    @flight.FlightLabel &middot; @flight.FlightNumber &middot; @flight.DepartureAirport &rarr; @flight.ArrivalAirport
+                </option>
+            }
+        </select>
+
+        <label for="Tag">Bag tag</label>
+        <input type="text" id="Tag" name="Tag" asp-for="Tag" placeholder="e.g. DEMO-101-001" autocomplete="off" />
+
+        <button class="btn" type="submit" asp-page-handler="Verify">Verify</button>
+        @if (Model.Result?.CanConfirmLoad == true)
+        {
+            <button class="btn" type="submit" asp-page-handler="Confirm" style="background:#1e6b2a;">Confirm loaded</button>
+        }
+    </form>
+</div>
+
+@if (Model.Result is not null)
+{
+    var cssClass = Model.Result.Outcome == AeroLink.Web.Models.BagVerificationOutcome.Verified
+        ? "alert-success"
+        : "alert-error";
+
+    <div class="@cssClass">
+        @Model.Result.Message
+    </div>
+
+    @if (Model.Result.Bag is not null)
+    {
+        <div class="card">
+            <table>
+                <tbody>
+                    <tr><th>Tag</th><td>@Model.Result.Bag.Tag</td></tr>
+                    <tr><th>Handling type</th><td>@Model.Result.Bag.HandlingType</td></tr>
+                    <tr><th>Handling instruction</th><td>@Model.Result.Bag.HandlingInstruction</td></tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            @if (Model.Result.Bag.IsLoaded)
+                            {
+                                <span class="badge badge-loaded">Loaded</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-pending">@Model.Result.Bag.Outcome</span>
+                            }
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+}

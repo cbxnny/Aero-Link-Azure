@@ -1,0 +1,906 @@
+{
+  "Flights": [
+    {
+      "FlightId": 101,
+      "FlightLabel": "A",
+      "FlightNumber": "DEMO101",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "SYD",
+      "ScheduledDepartureUtc": "2026-10-05T03:00:00",
+      "AircraftId": "DEMO-AIR-101",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 102,
+      "FlightLabel": "B",
+      "FlightNumber": "DEMO102",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "MEL",
+      "ScheduledDepartureUtc": "2026-10-05T03:30:00",
+      "AircraftId": "DEMO-AIR-102",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 103,
+      "FlightLabel": "C",
+      "FlightNumber": "DEMO103",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "CBR",
+      "ScheduledDepartureUtc": "2026-10-05T04:00:00",
+      "AircraftId": "DEMO-AIR-103",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 104,
+      "FlightLabel": "D",
+      "FlightNumber": "DEMO104",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "CNS",
+      "ScheduledDepartureUtc": "2026-10-05T04:30:00",
+      "AircraftId": "DEMO-AIR-104",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 105,
+      "FlightLabel": "E",
+      "FlightNumber": "DEMO105",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "ADL",
+      "ScheduledDepartureUtc": "2026-10-05T05:00:00",
+      "AircraftId": "DEMO-AIR-105",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 106,
+      "FlightLabel": "F",
+      "FlightNumber": "DEMO106",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "PER",
+      "ScheduledDepartureUtc": "2026-10-05T05:30:00",
+      "AircraftId": "DEMO-AIR-106",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 107,
+      "FlightLabel": "G",
+      "FlightNumber": "DEMO107",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "HBA",
+      "ScheduledDepartureUtc": "2026-10-05T06:00:00",
+      "AircraftId": "DEMO-AIR-107",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 108,
+      "FlightLabel": "H",
+      "FlightNumber": "DEMO108",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "DRW",
+      "ScheduledDepartureUtc": "2026-10-05T06:30:00",
+      "AircraftId": "DEMO-AIR-108",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 109,
+      "FlightLabel": "I",
+      "FlightNumber": "DEMO109",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "OOL",
+      "ScheduledDepartureUtc": "2026-10-05T07:00:00",
+      "AircraftId": "DEMO-AIR-109",
+      "LoadingStatus": "NotStarted"
+    },
+    {
+      "FlightId": 110,
+      "FlightLabel": "J",
+      "FlightNumber": "DEMO101",
+      "DepartureAirport": "BNE",
+      "ArrivalAirport": "SYD",
+      "ScheduledDepartureUtc": "2026-10-06T03:00:00",
+      "AircraftId": "DEMO-AIR-110",
+      "LoadingStatus": "NotStarted"
+    }
+  ],
+  "Bags": [
+    {
+      "BagId": 1,
+      "FlightId": 101,
+      "Tag": "DEMO-101-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 2,
+      "FlightId": 101,
+      "Tag": "DEMO-101-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 3,
+      "FlightId": 101,
+      "Tag": "DEMO-101-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 4,
+      "FlightId": 101,
+      "Tag": "DEMO-101-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 5,
+      "FlightId": 101,
+      "Tag": "DEMO-101-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 6,
+      "FlightId": 101,
+      "Tag": "DEMO-101-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 7,
+      "FlightId": 101,
+      "Tag": "DEMO-101-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 8,
+      "FlightId": 101,
+      "Tag": "DEMO-101-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 9,
+      "FlightId": 101,
+      "Tag": "DEMO-101-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 10,
+      "FlightId": 101,
+      "Tag": "DEMO-101-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 11,
+      "FlightId": 102,
+      "Tag": "DEMO-102-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 12,
+      "FlightId": 102,
+      "Tag": "DEMO-102-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 13,
+      "FlightId": 102,
+      "Tag": "DEMO-102-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 14,
+      "FlightId": 102,
+      "Tag": "DEMO-102-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 15,
+      "FlightId": 102,
+      "Tag": "DEMO-102-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 16,
+      "FlightId": 102,
+      "Tag": "DEMO-102-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 17,
+      "FlightId": 102,
+      "Tag": "DEMO-102-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 18,
+      "FlightId": 102,
+      "Tag": "DEMO-102-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 19,
+      "FlightId": 102,
+      "Tag": "DEMO-102-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 20,
+      "FlightId": 102,
+      "Tag": "DEMO-102-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 21,
+      "FlightId": 103,
+      "Tag": "DEMO-103-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 22,
+      "FlightId": 103,
+      "Tag": "DEMO-103-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 23,
+      "FlightId": 103,
+      "Tag": "DEMO-103-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 24,
+      "FlightId": 103,
+      "Tag": "DEMO-103-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 25,
+      "FlightId": 103,
+      "Tag": "DEMO-103-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 26,
+      "FlightId": 103,
+      "Tag": "DEMO-103-006",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 27,
+      "FlightId": 103,
+      "Tag": "DEMO-103-007",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 28,
+      "FlightId": 103,
+      "Tag": "DEMO-103-008",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 29,
+      "FlightId": 103,
+      "Tag": "DEMO-103-009",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 30,
+      "FlightId": 103,
+      "Tag": "DEMO-103-010",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 31,
+      "FlightId": 104,
+      "Tag": "DEMO-104-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 32,
+      "FlightId": 104,
+      "Tag": "DEMO-104-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 33,
+      "FlightId": 104,
+      "Tag": "DEMO-104-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 34,
+      "FlightId": 104,
+      "Tag": "DEMO-104-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 35,
+      "FlightId": 104,
+      "Tag": "DEMO-104-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 36,
+      "FlightId": 104,
+      "Tag": "DEMO-104-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 37,
+      "FlightId": 104,
+      "Tag": "DEMO-104-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 38,
+      "FlightId": 104,
+      "Tag": "DEMO-104-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 39,
+      "FlightId": 104,
+      "Tag": "DEMO-104-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 40,
+      "FlightId": 104,
+      "Tag": "DEMO-104-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 41,
+      "FlightId": 105,
+      "Tag": "DEMO-105-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 42,
+      "FlightId": 105,
+      "Tag": "DEMO-105-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 43,
+      "FlightId": 105,
+      "Tag": "DEMO-105-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 44,
+      "FlightId": 105,
+      "Tag": "DEMO-105-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 45,
+      "FlightId": 105,
+      "Tag": "DEMO-105-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 46,
+      "FlightId": 105,
+      "Tag": "DEMO-105-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 47,
+      "FlightId": 105,
+      "Tag": "DEMO-105-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 48,
+      "FlightId": 105,
+      "Tag": "DEMO-105-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 49,
+      "FlightId": 105,
+      "Tag": "DEMO-105-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 50,
+      "FlightId": 105,
+      "Tag": "DEMO-105-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 51,
+      "FlightId": 106,
+      "Tag": "DEMO-106-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 52,
+      "FlightId": 106,
+      "Tag": "DEMO-106-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 53,
+      "FlightId": 106,
+      "Tag": "DEMO-106-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 54,
+      "FlightId": 106,
+      "Tag": "DEMO-106-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 55,
+      "FlightId": 106,
+      "Tag": "DEMO-106-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 56,
+      "FlightId": 106,
+      "Tag": "DEMO-106-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 57,
+      "FlightId": 106,
+      "Tag": "DEMO-106-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 58,
+      "FlightId": 106,
+      "Tag": "DEMO-106-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 59,
+      "FlightId": 106,
+      "Tag": "DEMO-106-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 60,
+      "FlightId": 106,
+      "Tag": "DEMO-106-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 61,
+      "FlightId": 107,
+      "Tag": "DEMO-107-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 62,
+      "FlightId": 107,
+      "Tag": "DEMO-107-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 63,
+      "FlightId": 107,
+      "Tag": "DEMO-107-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 64,
+      "FlightId": 107,
+      "Tag": "DEMO-107-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 65,
+      "FlightId": 107,
+      "Tag": "DEMO-107-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 66,
+      "FlightId": 107,
+      "Tag": "DEMO-107-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 67,
+      "FlightId": 107,
+      "Tag": "DEMO-107-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 68,
+      "FlightId": 107,
+      "Tag": "DEMO-107-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 69,
+      "FlightId": 107,
+      "Tag": "DEMO-107-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 70,
+      "FlightId": 107,
+      "Tag": "DEMO-107-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 71,
+      "FlightId": 108,
+      "Tag": "DEMO-108-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 72,
+      "FlightId": 108,
+      "Tag": "DEMO-108-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 73,
+      "FlightId": 108,
+      "Tag": "DEMO-108-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 74,
+      "FlightId": 108,
+      "Tag": "DEMO-108-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 75,
+      "FlightId": 108,
+      "Tag": "DEMO-108-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 76,
+      "FlightId": 108,
+      "Tag": "DEMO-108-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 77,
+      "FlightId": 108,
+      "Tag": "DEMO-108-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 78,
+      "FlightId": 108,
+      "Tag": "DEMO-108-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 79,
+      "FlightId": 108,
+      "Tag": "DEMO-108-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 80,
+      "FlightId": 108,
+      "Tag": "DEMO-108-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 81,
+      "FlightId": 109,
+      "Tag": "DEMO-109-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 82,
+      "FlightId": 109,
+      "Tag": "DEMO-109-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 83,
+      "FlightId": 109,
+      "Tag": "DEMO-109-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 84,
+      "FlightId": 109,
+      "Tag": "DEMO-109-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 85,
+      "FlightId": 109,
+      "Tag": "DEMO-109-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 86,
+      "FlightId": 109,
+      "Tag": "DEMO-109-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 87,
+      "FlightId": 109,
+      "Tag": "DEMO-109-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 88,
+      "FlightId": 109,
+      "Tag": "DEMO-109-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 89,
+      "FlightId": 109,
+      "Tag": "DEMO-109-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 90,
+      "FlightId": 109,
+      "Tag": "DEMO-109-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 91,
+      "FlightId": 110,
+      "Tag": "DEMO-110-001",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 92,
+      "FlightId": 110,
+      "Tag": "DEMO-110-002",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 93,
+      "FlightId": 110,
+      "Tag": "DEMO-110-003",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 94,
+      "FlightId": 110,
+      "Tag": "DEMO-110-004",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 95,
+      "FlightId": 110,
+      "Tag": "DEMO-110-005",
+      "HandlingType": "Standard",
+      "HandlingInstruction": "Standard handling.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 96,
+      "FlightId": 110,
+      "Tag": "DEMO-110-006",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 97,
+      "FlightId": 110,
+      "Tag": "DEMO-110-007",
+      "HandlingType": "Fragile",
+      "HandlingInstruction": "Handle with care. Keep upright.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 98,
+      "FlightId": 110,
+      "Tag": "DEMO-110-008",
+      "HandlingType": "Oversized",
+      "HandlingInstruction": "Use the designated oversized baggage area.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 99,
+      "FlightId": 110,
+      "Tag": "DEMO-110-009",
+      "HandlingType": "Wheelchair",
+      "HandlingInstruction": "Handle carefully. Keep supplied parts together.",
+      "Outcome": "Pending"
+    },
+    {
+      "BagId": 100,
+      "FlightId": 110,
+      "Tag": "DEMO-110-010",
+      "HandlingType": "SportingEquipment",
+      "HandlingInstruction": "Keep equipment in its protective case.",
+      "Outcome": "Pending"
+    }
+  ]
+}
