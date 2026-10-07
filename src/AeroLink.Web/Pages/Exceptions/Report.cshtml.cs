@@ -68,9 +68,9 @@ public class ReportModel : PageModel
             return Page();
         }
 
-        // TODO: once T2 (login) exists, replace this placeholder with the
-        // signed-in employee's name from session.
-        const string reportedBy = "Baggage Handler";
+        var reportedBy = User.Identity?.IsAuthenticated == true && !string.IsNullOrWhiteSpace(User.Identity.Name)
+            ? User.Identity.Name
+            : "Baggage Handler";
 
         Result = await _exceptionService.ReportAsync(FlightId.Value, Tag, Category, Description, reportedBy);
         return Page();

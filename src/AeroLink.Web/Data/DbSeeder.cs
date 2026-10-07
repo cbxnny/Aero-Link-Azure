@@ -1,5 +1,6 @@
 using System.Text.Json;
 using AeroLink.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AeroLink.Web.Data;
 
@@ -45,6 +46,24 @@ public static class DbSeeder
     public static async Task SeedAsync(AeroLinkDbContext db, string contentRootPath)
     {
         await db.Database.EnsureCreatedAsync();
+
+        // Ensure Exceptions table exists in existing databases without requiring DB deletion
+        await db.Database.ExecuteSqlRawAsync(@"
+            CREATE TABLE IF NOT EXISTS ""Exceptions"" (
+                ""ExceptionId"" INTEGER NOT NULL CONSTRAINT ""PK_Exceptions"" PRIMARY KEY AUTOINCREMENT,
+                ""BagId"" INTEGER NOT NULL,
+                ""FlightId"" INTEGER NOT NULL DEFAULT 0,
+                ""Category"" TEXT NOT NULL DEFAULT 'Other',
+                ""Description"" TEXT NOT NULL DEFAULT '',
+                ""Status"" TEXT NOT NULL DEFAULT 'Open',
+                ""ReportedAtUtc"" TEXT NOT NULL,
+                ""ReportedByEmployeeName"" TEXT NULL,
+                ""DecisionReason"" TEXT NULL,
+                ""DecidedAtUtc"" TEXT NULL,
+                ""DecidedByEmployeeName"" TEXT NULL,
+                CONSTRAINT ""FK_Exceptions_Bags_BagId"" FOREIGN KEY (""BagId"") REFERENCES ""Bags"" (""BagId"") ON DELETE CASCADE
+            );
+        ");
 
         if (db.Flights.Any())
         {

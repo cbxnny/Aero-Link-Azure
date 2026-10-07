@@ -39,10 +39,9 @@ public class IndexModel : PageModel
     /// <summary>Records a Resolve or Approve-not-to-load decision against one exception.</summary>
     public async Task<IActionResult> OnPostDecideAsync(int exceptionId, string decision, string reason)
     {
-        // TODO: once T2 (login) exists, replace this placeholder with the
-        // signed-in Supervisor's name from session, and check session.Role
-        // is BG_Supervisor before allowing a decision to be recorded.
-        const string decidedBy = "Baggage Supervisor";
+        var decidedBy = User.Identity?.IsAuthenticated == true && !string.IsNullOrWhiteSpace(User.Identity.Name)
+            ? User.Identity.Name
+            : "Baggage Supervisor";
 
         var result = decision == "notload"
             ? await _reviewService.ApproveNotToLoadAsync(exceptionId, reason, decidedBy)

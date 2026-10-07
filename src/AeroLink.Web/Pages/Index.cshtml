@@ -1,19 +1,213 @@
 @page
+@model AeroLink.Web.Pages.IndexModel
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = "Operations Home";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "Guest";
+    var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var roleDisplayName = User.FindFirst("RoleDisplayName")?.Value ?? (isAuthenticated ? "Staff Member" : "Guest Operator");
+    var employeeId = User.FindFirst("EmployeeId")?.Value ?? "";
 }
 
-<div class="card">
-    <h1>AeroLink Ground Services</h1>
-    <p>Baggage Unloading, Transfer and Loading Management prototype.</p>
-    <p>
-        Login and role-based module access (T1/T2) are handled by another
-        team member's build. This build covers the Module 5.2 stories below.
-    </p>
-    <ul>
-        <li><a href="/Manifest">View a flight's baggage manifest (I1)</a></li>
-        <li><a href="/BagVerification/Verify">Verify and confirm a bag tag (I2)</a></li>
-        <li><a href="/Exceptions/Report">Report a problem with a bag (I4)</a></li>
-        <li><a href="/SupervisorReview">Review and decide open exceptions (I5)</a></li>
-    </ul>
+<div class="portal-dashboard">
+    <!-- Hero / Welcome Banner -->
+    <div class="hero-card">
+        <div class="hero-content">
+            <div class="hero-meta">
+                <span class="station-tag">📍 STATION: BNE &middot; Brisbane Operations</span>
+                <span class="live-clock">🕒 UTC @DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")</span>
+            </div>
+            <h1>AeroLink Ground Services</h1>
+            <p class="hero-subtitle">Departure Baggage Loading Verification & Exception Management System</p>
+            
+            <div class="user-greeting-banner">
+                @if (isAuthenticated)
+                {
+                    <div class="logged-in-profile-chip">
+                        <span class="status-indicator online"></span>
+                        <span>Logged in as <strong>@userName</strong></span>
+                        <span class="badge @(roleClaim == "BG_Supervisor" ? "badge-supervisor" : "badge-handler")">@roleDisplayName</span>
+                        @if (!string.IsNullOrEmpty(employeeId))
+                        {
+                            <span class="emp-code">[@employeeId]</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="guest-banner">
+                        <span class="status-indicator guest"></span>
+                        <span>Browsing in <strong>Guest Mode</strong>. Sign in with staff credentials for supervisor authorization.</span>
+                        <a href="/Login" class="btn btn-sm btn-accent">Sign In</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Operational Stats Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-icon">🛫</div>
+            <div class="metric-info">
+                <span class="metric-value">@Model.TotalFlights</span>
+                <span class="metric-label">Departure Flights</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">🧳</div>
+            <div class="metric-info">
+                <span class="metric-value">@Model.TotalBags</span>
+                <span class="metric-label">Tracked Manifest Bags</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon">✅</div>
+            <div class="metric-info">
+                <span class="metric-value">@Model.LoadedBags / @Model.TotalBags</span>
+                <span class="metric-label">Bags Loaded (@Model.LoadPercentage%)</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width: @Model.LoadPercentage%;"></div>
+            </div>
+        </div>
+
+        <div class="metric-card @(Model.OpenExceptions > 0 ? "metric-alert" : "")">
+            <div class="metric-icon">⚠️</div>
+            <div class="metric-info">
+                <span class="metric-value">@Model.OpenExceptions</span>
+                <span class="metric-label">Open Exceptions Awaiting Review</span>
+            </div>
+            @if (Model.OpenExceptions > 0)
+            {
+                <span class="urgent-tag">Action Required</span>
+            }
+        </div>
+    </div>
+
+    <!-- Core Operational Modules Grid -->
+    <h2 class="section-title">Operational Workflow Modules</h2>
+    <div class="modules-grid">
+        <!-- Module I1 -->
+        <div class="module-card">
+            <div class="module-header">
+                <span class="module-badge">STORY I1</span>
+                <span class="module-role-pill">Handler & Supervisor</span>
+            </div>
+            <h3>Flight Baggage Manifest</h3>
+            <p>Inspect real-time loading manifests for active departures, view assigned bags, handling flags, and remaining cargo.</p>
+            <div class="module-action">
+                <a href="/Manifest" class="btn btn-primary btn-block">Open Manifest &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Module I2 -->
+        <div class="module-card">
+            <div class="module-header">
+                <span class="module-badge">STORY I2</span>
+                <span class="module-role-pill">Ramp Handler</span>
+            </div>
+            <h3>Baggage Verification</h3>
+            <p>Scan and confirm bag tags at the aircraft belt. Enforces manifest membership, destination checks, and flags special cargo.</p>
+            <div class="module-action">
+                <a href="/BagVerification/Verify" class="btn btn-primary btn-block">Verify Bag Tag &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Module I4 -->
+        <div class="module-card">
+            <div class="module-header">
+                <span class="module-badge">STORY I4</span>
+                <span class="module-role-pill">Ramp Handler</span>
+            </div>
+            <h3>Report Bag Problem</h3>
+            <p>Log damaged, missing, or unreadable baggage tags. Immediately isolates baggage from aircraft hold until investigated.</p>
+            <div class="module-action">
+                <a href="/Exceptions/Report" class="btn btn-warning btn-block">Report Exception &rarr;</a>
+            </div>
+        </div>
+
+        <!-- Module I5 -->
+        <div class="module-card @(Model.OpenExceptions > 0 ? "highlight-card" : "")">
+            <div class="module-header">
+                <span class="module-badge">STORY I5</span>
+                <span class="module-role-pill supervisor-pill">Supervisor Only</span>
+            </div>
+            <h3>Supervisor Exception Review</h3>
+            <p>Review open incident reports, assess ramp issues, and authorize clearance or confirm bags not-to-load.</p>
+            <div class="module-action">
+                <a href="/SupervisorReview" class="btn btn-primary btn-block">
+                    Review Exceptions
+                    @if (Model.OpenExceptions > 0)
+                    {
+                        <span class="badge badge-alert-count">@Model.OpenExceptions</span>
+                    }
+                    &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Flights Schedule Table -->
+    <div class="card schedule-card">
+        <div class="card-header-flex">
+            <h2>Today's Departure Schedule (BNE)</h2>
+            <a href="/Manifest" class="btn btn-sm btn-secondary">View All Manifests</a>
+        </div>
+        
+        <table class="flights-table">
+            <thead>
+                <tr>
+                    <th>Flight</th>
+                    <th>Destination</th>
+                    <th>Departure (UTC)</th>
+                    <th>Aircraft</th>
+                    <th>Loading Status</th>
+                    <th>Bags Loaded</th>
+                    <th>Quick Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Model.Flights)
+                {
+                    <tr>
+                        <td><strong>@f.FlightNumber</strong></td>
+                        <td><span class="airport-pill">@f.Destination</span></td>
+                        <td>@f.ScheduledDepartureUtc.ToString("HH:mm")</td>
+                        <td><code>@f.AircraftId</code></td>
+                        <td>
+                            <span class="badge @(f.Status == "Completed" ? "badge-loaded" : "badge-pending")">
+                                @f.Status
+                            </span>
+                        </td>
+                        <td>
+                            <strong>@f.LoadedBags</strong> / @f.TotalBags
+                            <span class="subtext">(@(f.TotalBags > 0 ? (int)(100.0 * f.LoadedBags / f.TotalBags) : 0)%)</span>
+                        </td>
+                        <td class="action-cell">
+                            <a href="/Manifest?FlightId=@f.FlightId" class="table-link">Manifest</a>
+                            <span class="sep">&middot;</span>
+                            <a href="/BagVerification/Verify?FlightId=@f.FlightId" class="table-link">Verify</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Team and Architecture Note -->
+    <div class="card info-box">
+        <h3>ℹ️ AeroLink Architecture & Access Information</h3>
+        <p>
+            AeroLink is engineered for airport ramp operations. Authentication is integrated with the simulated airline HR System API (Story T2).
+            Baggage handlers perform scans and log incident reports, while Baggage Supervisors review exceptions and authorise final ramp dispatch.
+        </p>
+        <div class="info-chips">
+            <span class="chip">🔐 Authentication: Cookie + Mock HR API</span>
+            <span class="chip">💾 Persistence: SQLite + EF Core</span>
+            <span class="chip">🛡️ Roles: BG_Supervisor &middot; BG_Handler</span>
+        </div>
+    </div>
 </div>

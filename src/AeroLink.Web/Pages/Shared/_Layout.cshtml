@@ -3,18 +3,48 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AeroLink</title>
+    <title>@ViewData["Title"] - AeroLink Ground Services</title>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
     <header class="site-header">
-        <a class="brand" href="/">AeroLink Ground Services</a>
-        <nav>
+        <div class="header-brand-container">
+            <a class="brand" href="/">
+                <span class="brand-icon">✈</span>
+                <span class="brand-text">AeroLink</span>
+                <span class="brand-sub">Ground Operations</span>
+            </a>
+        </div>
+        
+        <nav class="site-nav">
+            <a href="/">Home</a>
             <a href="/Manifest">Manifest</a>
             <a href="/BagVerification/Verify">Verify Bag</a>
             <a href="/Exceptions/Report">Report Problem</a>
             <a href="/SupervisorReview">Supervisor Review</a>
         </nav>
+
+        <div class="header-user-actions">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="user-pill">
+                    <span class="user-avatar">👤</span>
+                    <span class="user-name">@User.Identity.Name</span>
+                    @{
+                        var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+                        var isSupervisor = role == "BG_Supervisor";
+                    }
+                    <span class="badge @(isSupervisor ? "badge-supervisor" : "badge-handler")">
+                        @(isSupervisor ? "Supervisor" : "Handler")
+                    </span>
+                    <a href="/Logout" class="btn-logout" title="Sign out of AeroLink">Sign Out</a>
+                </div>
+            }
+            else
+            {
+                <a href="/Login" class="btn-login-nav">Sign In</a>
+            }
+        </div>
     </header>
 
     <main class="container">
@@ -22,7 +52,10 @@
     </main>
 
     <footer class="site-footer">
-        <span>AeroLink prototype &middot; Baggage Unloading, Transfer and Loading Management</span>
+        <div class="footer-inner">
+            <span>AeroLink Ground Services &middot; Baggage Unloading, Transfer and Loading Management Prototype</span>
+            <span class="footer-meta">Station: BNE &middot; IAB251 Module 5.2</span>
+        </div>
     </footer>
 </body>
 </html>
