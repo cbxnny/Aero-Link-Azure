@@ -12,6 +12,8 @@ builder.Services.AddDbContext<AeroLinkDbContext>(options =>
 
 builder.Services.AddScoped<IManifestService, ManifestService>();
 builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
+builder.Services.AddScoped<IExceptionService, ExceptionService>();
+builder.Services.AddScoped<ISupervisorReviewService, SupervisorReviewService>();
 
 var app = builder.Build();
 

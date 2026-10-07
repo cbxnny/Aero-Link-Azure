@@ -1,0 +1,57 @@
+@page
+@model AeroLink.Web.Pages.Exceptions.ReportModel
+@{
+    ViewData["Title"] = "Report a Problem";
+}
+
+<div class="card">
+    <h1>Report a Problem</h1>
+    <p>Enter the bag tag with a problem so a Supervisor can investigate it before loading closes.</p>
+
+    @if (!ModelState.IsValid)
+    {
+        <div class="alert-error">
+            @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post">
+        <label for="FlightId">Departure flight</label>
+        <select id="FlightId" name="FlightId" asp-for="FlightId">
+            <option value="">-- select a flight --</option>
+            @foreach (var flight in Model.Flights)
+            {
+                <option value="@flight.FlightId" selected="@(flight.FlightId == Model.FlightId)">
+                    @flight.FlightLabel &middot; @flight.FlightNumber &middot; @flight.DepartureAirport &rarr; @flight.ArrivalAirport
+                </option>
+            }
+        </select>
+
+        <label for="Tag">Bag tag</label>
+        <input type="text" id="Tag" name="Tag" asp-for="Tag" placeholder="e.g. DEMO-101-001" autocomplete="off" />
+
+        <label for="Category">Problem type</label>
+        <select id="Category" name="Category" asp-for="Category">
+            <option value="MissingBag">Missing bag</option>
+            <option value="DamagedBag">Damaged bag</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="Description">Description</label>
+        <textarea id="Description" name="Description" asp-for="Description" rows="3"></textarea>
+
+        <button class="btn" type="submit" asp-page-handler="Report">Submit exception</button>
+    </form>
+</div>
+
+@if (Model.Result is not null)
+{
+    var cssClass = Model.Result.Success ? "alert-success" : "alert-error";
+
+    <div class="@cssClass">
+        @Model.Result.Message
+    </div>
+}

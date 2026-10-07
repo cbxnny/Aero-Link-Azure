@@ -1,0 +1,44 @@
+@page
+@model AeroLink.Web.Pages.SupervisorReview.IndexModel
+@{
+    ViewData["Title"] = "Open Exceptions";
+}
+
+<div class="card">
+    <h1>Open Baggage Exceptions</h1>
+    <p>Resolve a reported problem, or explicitly approve the bag not to load.</p>
+</div>
+
+@if (!Model.Exceptions.Any())
+{
+    <div class="card"><p>No open exceptions.</p></div>
+}
+
+@foreach (var exception in Model.Exceptions)
+{
+    <div class="card">
+        <table>
+            <tbody>
+                <tr><th>Bag tag</th><td>@exception.Bag?.Tag</td></tr>
+                <tr><th>Category</th><td>@exception.Category</td></tr>
+                <tr><th>Description</th><td>@exception.Description</td></tr>
+                <tr><th>Reported</th><td>@exception.ReportedAtUtc.ToString("dd MMM HH:mm") UTC by @exception.ReportedByEmployeeName</td></tr>
+            </tbody>
+        </table>
+
+        <form method="post" asp-page-handler="Decide">
+            <input type="hidden" name="exceptionId" value="@exception.ExceptionId" />
+            <label for="reason-@exception.ExceptionId">Reason</label>
+            <textarea id="reason-@exception.ExceptionId" name="reason" rows="2"></textarea>
+
+            <button class="btn" type="submit" name="decision" value="resolve">Resolve (bag remains pending)</button>
+            <button class="btn" type="submit" name="decision" value="notload" style="background:#b3261e;">Approve not to load</button>
+        </form>
+    </div>
+}
+
+@if (Model.StatusMessage is not null)
+{
+    var cssClass = Model.DecisionSucceeded ? "alert-success" : "alert-error";
+    <div class="@cssClass">@Model.StatusMessage</div>
+}

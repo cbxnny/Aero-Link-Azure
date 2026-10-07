@@ -5,7 +5,7 @@ namespace AeroLink.Web.Data;
 
 /// <summary>
 /// EF Core database context for the baggage handling prototype. Holds the
-/// flight and bag tables used across the Module 5.2 user stories.
+/// flight, bag and exception tables used across the Module 5.2 user stories.
 /// </summary>
 public class AeroLinkDbContext : DbContext
 {
@@ -21,6 +21,9 @@ public class AeroLinkDbContext : DbContext
     /// <summary>Expected bags across all flights.</summary>
     public DbSet<Bag> Bags => Set<Bag>();
 
+    /// <summary>Reported problems against bags (I4/I5).</summary>
+    public DbSet<BaggageException> Exceptions => Set<BaggageException>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +34,14 @@ public class AeroLinkDbContext : DbContext
 
         modelBuilder.Entity<Bag>()
             .HasIndex(b => b.Tag);
+
+        modelBuilder.Entity<BaggageException>()
+            .HasKey(e => e.ExceptionId);
+            
+        modelBuilder.Entity<BaggageException>()
+            .HasOne(e => e.Bag)
+            .WithMany()
+            .HasForeignKey(e => e.BagId);
 
         base.OnModelCreating(modelBuilder);
     }
