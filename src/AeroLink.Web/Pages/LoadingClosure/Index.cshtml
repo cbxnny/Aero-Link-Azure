@@ -1,0 +1,164 @@
+@page
+@model AeroLink.Web.Pages.LoadingClosure.IndexModel
+@{
+    ViewData["Title"] = "Loading Completion";
+}
+
+<div class="card">
+    <h1>Loading completion</h1>
+    <p>Review every expected bag and resolve open exceptions before a Supervisor closes loading.</p>
+    <form method="get">
+        <label for="FlightId">Departure flight</label>
+        <select asp-for="FlightId">
+            <option value="">-- select a flight --</option>
+            @foreach (var flight in Model.Flights)
+            {
+                <option value="@flight.FlightId">@flight.FlightLabel · @flight.FlightNumber · @flight.DepartureAirport → @flight.ArrivalAirport (@flight.LoadingStatus)</option>
+            }
+        </select>
+        <button class="btn btn-primary" type="submit">View loading status</button>
+    </form>
+</div>
+
+@if (Model.StatusMessage is not null)
+{
+    <div class="alert-error" role="alert">@Model.StatusMessage</div>
+}
+
+@if (Model.Summary is not null && Model.Completion is not null)
+{
+    var summary = Model.Summary;
+    var completion = Model.Completion;
+    <div class="card">
+        <h2>Final loading summary — @summary.FlightNumber</h2>
+        <p class="alert-success">Completed — this loading record is read-only.</p>
+        <p>
+            @summary.DepartureAirport → @summary.ArrivalAirport · Aircraft @summary.AircraftId<br />
+            Scheduled departure: @summary.ScheduledDepartureUtc.ToString("dd MMM yyyy HH:mm 'UTC'")<br />
+            Completed: @completion.CompletedAtUtc.ToString("dd MMM yyyy HH:mm:ss 'UTC'")<br />
+            Supervisor: @completion.CompletedByName (@completion.CompletedByEmployeeId)
+        </p>
+        <dl>
+            <dt>Expected bags</dt><dd>@summary.ExpectedCount</dd>
+            <dt>Loaded bags</dt><dd>@summary.LoadedCount</dd>
+            <dt>Approved not to load</dt><dd>@summary.ApprovedNotToLoadCount</dd>
+            <dt>Outstanding bags at closure</dt><dd>0</dd>
+            <dt>Open exceptions at closure</dt><dd>0</dd>
+        </dl>
+        <table>
+            <caption>Final baggage outcomes</caption>
+            <thead><tr><th scope="col">Bag tag</th><th scope="col">Handling category</th><th scope="col">Final outcome</th><th scope="col">Loaded at (UTC)</th></tr></thead>
+            <tbody>
+                @foreach (var bag in summary.Bags)
+                {
+                    <tr>
+                        <td>@bag.Tag</td><td>@bag.HandlingType</td>
+                        <td>@(bag.Outcome == "ApprovedNotToLoad" ? "Approved not to load" : bag.Outcome)</td>
+                        <td>@(bag.LoadedAtUtc?.ToString("dd MMM yyyy HH:mm:ss") ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (summary.Exceptions.Count > 0)
+        {
+            <h3>Exception decisions</h3>
+            <table>
+                <thead><tr><th scope="col">Bag tag</th><th scope="col">Problem</th><th scope="col">Decision</th><th scope="col">Reason</th><th scope="col">Decided by</th></tr></thead>
+                <tbody>
+                    @foreach (var exception in summary.Exceptions)
+                    {
+                        <tr>
+                            <td>@exception.Tag</td><td>@exception.Category: @exception.Description</td>
+                            <td>@(exception.Status == "ApprovedNotToLoad" ? "Approved not to load" : exception.Status)</td>
+                            <td>@exception.DecisionReason</td><td>@exception.DecidedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        <p>
+            <button class="btn btn-secondary" type="button" onclick="window.print()">Print summary</button>
+            <a class="btn btn-secondary" asp-page="/Manifest/Index" asp-route-flightId="@summary.FlightId">Review manifest</a>
+        </p>
+    </div>
+}
+else if (Model.Readiness is not null)
+{
+    var status = Model.Readiness;
+    <div class="card">
+        <h2>@status.Flight.FlightNumber — @status.Flight.DepartureAirport → @status.Flight.ArrivalAirport</h2>
+        <dl>
+            <dt>Expected bags</dt><dd>@status.ExpectedCount</dd>
+            <dt>Loaded bags</dt><dd>@status.LoadedCount</dd>
+            <dt>Approved not to load</dt><dd>@status.ApprovedNotToLoadCount</dd>
+            <dt>Outstanding bags</dt><dd>@status.OutstandingBags.Count</dd>
+            <dt>Open exceptions</dt><dd>@status.OpenExceptions.Count</dd>
+        </dl>
+
+        @if (status.IsCompleted)
+        {
+            <p class="alert-error">This flight is already completed and read-only. No saved final summary is available for this older record.</p>
+        }
+        else
+        {
+            @if (status.CanClose)
+            {
+                <p class="alert-success">Ready for completion: every expected bag is accounted for and no exception remains open.</p>
+            }
+            else
+            {
+                <p class="alert-error">Loading cannot be completed until the following blockers are cleared.</p>
+            }
+            @if (status.ExpectedCount == 0)
+            {
+                <p>No expected baggage manifest is available. Check the flight's manifest before closing loading.</p>
+            }
+            @if (status.OutstandingBags.Count > 0)
+            {
+                <h3>Outstanding bags</h3>
+                <table>
+                    <thead><tr><th scope="col">Bag tag</th><th scope="col">Handling category</th><th scope="col">Current outcome</th></tr></thead>
+                    <tbody>
+                        @foreach (var bag in status.OutstandingBags)
+                        {
+                            <tr><td>@bag.Tag</td><td>@bag.HandlingType</td><td>@bag.Outcome</td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            @if (status.OpenExceptions.Count > 0)
+            {
+                <h3>Open exceptions</h3>
+                <table>
+                    <thead><tr><th scope="col">Bag tag</th><th scope="col">Category</th><th scope="col">Problem</th></tr></thead>
+                    <tbody>
+                        @foreach (var exception in status.OpenExceptions)
+                        {
+                            <tr><td>@(exception.Bag?.Tag ?? $"Bag #{exception.BagId}")</td><td>@exception.Category</td><td>@exception.Description</td></tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            <p>
+                <a class="btn btn-secondary" asp-page="/Manifest/Index" asp-route-flightId="@status.Flight.FlightId">Review manifest</a>
+                <a class="btn btn-secondary" asp-page="/BagVerification/Verify" asp-route-flightId="@status.Flight.FlightId">Verify bags</a>
+                @if (User.IsInRole("BG_Supervisor"))
+                {
+                    <a class="btn btn-secondary" asp-page="/SupervisorReview/Index">Review exceptions</a>
+                }
+            </p>
+            @if (User.IsInRole("BG_Supervisor"))
+            {
+                <form method="post" asp-page-handler="Close">
+                    <input type="hidden" name="FlightId" value="@status.Flight.FlightId" />
+                    <p>Closing loading is final. Further baggage and exception changes will be blocked.</p>
+                    <button class="btn btn-primary" type="submit" disabled="@(!status.CanClose)">Close loading</button>
+                </form>
+            }
+            else
+            {
+                <p>Only a signed-in Baggage Supervisor can close loading.</p>
+            }
+        }
+    </div>
+}

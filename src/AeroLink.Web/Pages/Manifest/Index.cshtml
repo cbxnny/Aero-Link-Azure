@@ -33,13 +33,16 @@
 {
     var flight = Model.SelectedFlight;
     var loadedCount = flight.Bags.Count(b => b.IsLoaded);
+    var approvedCount = flight.Bags.Count(b => b.Outcome == "ApprovedNotToLoad");
 
     <div class="card">
         <h2>@flight.FlightLabel &middot; @flight.FlightNumber (@flight.DepartureAirport &rarr; @flight.ArrivalAirport)</h2>
+        <p>Loading status: <strong>@flight.LoadingStatus</strong></p>
         <p>
             Expected bags: <strong>@flight.Bags.Count</strong> &middot;
             Loaded: <strong>@loadedCount</strong> &middot;
-            Outstanding: <strong>@(flight.Bags.Count - loadedCount)</strong>
+            Approved not to load: <strong>@approvedCount</strong> &middot;
+            Outstanding: <strong>@(flight.Bags.Count - loadedCount - approvedCount)</strong>
         </p>
 
         <table>
@@ -80,7 +83,13 @@
         </table>
 
         <p style="margin-top:1rem;">
-            <a class="btn" href="/BagVerification/Verify?flightId=@flight.FlightId">Go to bag verification &rarr;</a>
+            @if (flight.LoadingStatus != "Completed")
+            {
+                <a class="btn btn-secondary" href="/BagVerification/Verify?flightId=@flight.FlightId">Go to bag verification &rarr;</a>
+            }
+            <a class="btn btn-primary" asp-page="/LoadingClosure/Index" asp-route-flightId="@flight.FlightId">
+                @(flight.LoadingStatus == "Completed" ? "View final loading summary" : "Review loading completion")
+            </a>
         </p>
     </div>
 }
