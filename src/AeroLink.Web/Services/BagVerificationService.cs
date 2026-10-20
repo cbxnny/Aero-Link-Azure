@@ -72,9 +72,14 @@ public class BagVerificationService : IBagVerificationService
     }
 
     /// <inheritdoc />
-    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag)
+    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag, bool handlingAcknowledged = false)
     {
         var result = await VerifyAsync(flightId, tag);
+
+        if (result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement && handlingAcknowledged)
+        {
+            result.Outcome = BagVerificationOutcome.Verified;
+        }
 
         if (!result.CanConfirmLoad || result.Bag is null)
         {
