@@ -24,6 +24,9 @@ public class AeroLinkDbContext : DbContext
     /// <summary>Reported problems against bags (I4/I5).</summary>
     public DbSet<BaggageException> Exceptions => Set<BaggageException>();
 
+    /// <summary>Permanent final loading summaries, with one record per completed flight.</summary>
+    public DbSet<LoadingCompletion> LoadingCompletions => Set<LoadingCompletion>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +45,11 @@ public class AeroLinkDbContext : DbContext
             .HasOne(e => e.Bag)
             .WithMany()
             .HasForeignKey(e => e.BagId);
+
+        modelBuilder.Entity<LoadingCompletion>().HasKey(c => c.FlightId);
+        modelBuilder.Entity<LoadingCompletion>().Property(c => c.FlightId).ValueGeneratedNever();
+        modelBuilder.Entity<LoadingCompletion>().HasOne<Flight>().WithOne()
+            .HasForeignKey<LoadingCompletion>(c => c.FlightId).OnDelete(DeleteBehavior.Restrict);
 
         base.OnModelCreating(modelBuilder);
     }

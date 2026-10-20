@@ -40,8 +40,8 @@ public static class DbSeeder
     }
 
     /// <summary>
-    /// Applies pending migrations and seeds flights and bags from
-    /// Data/Seed/baggage-manifest.json when the database is empty.
+    /// Creates or additively upgrades the prototype schema, then seeds flights
+    /// and bags from Data/Seed/baggage-manifest.json when the database is empty.
     /// </summary>
     public static async Task SeedAsync(AeroLinkDbContext db, string contentRootPath)
     {
@@ -62,6 +62,20 @@ public static class DbSeeder
                 ""DecidedAtUtc"" TEXT NULL,
                 ""DecidedByEmployeeName"" TEXT NULL,
                 CONSTRAINT ""FK_Exceptions_Bags_BagId"" FOREIGN KEY (""BagId"") REFERENCES ""Bags"" (""BagId"") ON DELETE CASCADE
+            );
+        ");
+
+        // EnsureCreated does not add tables to an existing database. Preserve
+        // existing operational data while adding I6's completion records.
+        await db.Database.ExecuteSqlRawAsync(@"
+            CREATE TABLE IF NOT EXISTS ""LoadingCompletions"" (
+                ""FlightId"" INTEGER NOT NULL CONSTRAINT ""PK_LoadingCompletions"" PRIMARY KEY,
+                ""CompletedAtUtc"" TEXT NOT NULL,
+                ""CompletedByEmployeeId"" TEXT NOT NULL,
+                ""CompletedByName"" TEXT NOT NULL,
+                ""SummaryJson"" TEXT NOT NULL,
+                CONSTRAINT ""FK_LoadingCompletions_Flights_FlightId"" FOREIGN KEY (""FlightId"")
+                    REFERENCES ""Flights"" (""FlightId"") ON DELETE RESTRICT
             );
         ");
 
