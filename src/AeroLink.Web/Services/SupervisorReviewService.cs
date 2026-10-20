@@ -33,11 +33,17 @@ public class SupervisorReviewService : ISupervisorReviewService
     /// <inheritdoc />
     public async Task<ExceptionDecisionResult> ResolveAsync(int exceptionId, string reason, string? decidedByEmployeeName)
     {
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var exception = await _db.Exceptions.FindAsync(exceptionId);
 
         if (exception is null || exception.Status != "Open")
         {
             return new ExceptionDecisionResult { Success = false, Message = "This exception is not open, or does not exist." };
+        }
+
+        if (await _db.Flights.AnyAsync(f => f.FlightId == exception.FlightId && f.LoadingStatus == "Completed"))
+        {
+            return new ExceptionDecisionResult { Success = false, Message = "Loading for this flight is completed. Exception decisions are read-only." };
         }
 
         if (string.IsNullOrWhiteSpace(reason))
@@ -51,12 +57,14 @@ public class SupervisorReviewService : ISupervisorReviewService
         exception.DecidedByEmployeeName = decidedByEmployeeName;
 
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return new ExceptionDecisionResult { Success = true, Message = "Problem resolved. The bag remains pending for loading." };
     }
 
     /// <inheritdoc />
     public async Task<ExceptionDecisionResult> ApproveNotToLoadAsync(int exceptionId, string reason, string? decidedByEmployeeName)
     {
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var exception = await _db.Exceptions
             .Include(e => e.Bag)
             .FirstOrDefaultAsync(e => e.ExceptionId == exceptionId);
@@ -64,6 +72,11 @@ public class SupervisorReviewService : ISupervisorReviewService
         if (exception is null || exception.Status != "Open")
         {
             return new ExceptionDecisionResult { Success = false, Message = "This exception is not open, or does not exist." };
+        }
+
+        if (await _db.Flights.AnyAsync(f => f.FlightId == exception.FlightId && f.LoadingStatus == "Completed"))
+        {
+            return new ExceptionDecisionResult { Success = false, Message = "Loading for this flight is completed. Exception decisions are read-only." };
         }
 
         if (string.IsNullOrWhiteSpace(reason))
@@ -82,6 +95,7 @@ public class SupervisorReviewService : ISupervisorReviewService
         }
 
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
         return new ExceptionDecisionResult { Success = true, Message = "Bag approved not to load." };
     }
 }

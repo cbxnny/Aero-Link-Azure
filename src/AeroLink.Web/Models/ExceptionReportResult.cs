@@ -19,7 +19,10 @@ public enum ExceptionReportOutcome
     AlreadyLoaded,
 
     /// <summary>The bag already has an open exception awaiting a Supervisor decision.</summary>
-    AlreadyHasOpenException
+    AlreadyHasOpenException,
+
+    /// <summary>The flight's loading is complete; no new exception may change its final record.</summary>
+    FlightCompleted
 }
 
 /// <summary>Result of reporting a problem against a bag (I4).</summary>
