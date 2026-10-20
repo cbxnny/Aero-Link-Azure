@@ -9,22 +9,22 @@ against the Module 5.2 user stories from Assignment 1.
 - Sprint 1: 18 September 2026 to 25 October 2026
 - Framework: ASP.NET Core Razor Pages
 - Database: SQLite (see `src/AeroLink.Web/Data`)
-- Auth: dummy HR System API (see Assessment brief appendix)
+- Auth: local demo accounts in `AuthService`; supplied HR API integration is a team task
 
 ## Structure
 
 ```
 src/AeroLink.Web/      Razor Pages web app
   Pages/                One folder per functional area (Manifest, BagVerification,
-                         SpecialHandling, Exceptions, SupervisorReview, Shared)
+                         Exceptions, SupervisorReview, LoadingClosure, Shared)
   Models/                Domain and view models
   Services/              Business logic / HR API client
-  Data/                  DbContext, seed data, EF migrations
+  Data/                  DbContext, seed data, additive SQLite schema setup
   wwwroot/               Static assets
 
 tests/AeroLink.Tests/    Unit tests (black-box, per assignment brief)
 docs/                    Design carryover from Assignment 1, sprint notes
-.github/workflows/       CI placeholder
+.github/workflows/       Build and test CI
 ```
 
 ## User stories in this module
@@ -39,12 +39,15 @@ docs/                    Design carryover from Assignment 1, sprint notes
 | I6 | Supervisor closes loading | Paul |
 
 Team-level stories (T1 to T4: main screen, login, logout, live status report)
-are built collaboratively. This build includes a minimal `Pages/Index.cshtml`
-stub for T1 with no auth, so I1/I2 can be reached and demoed on their own.
+are built collaboratively. This branch includes the home page, local demo
+login/logout, and Paul's I3/I6 work. The I6 page requires sign-in and only
+`BG_Supervisor` users may close loading. The supplied HR API integration and
+the full T4 live report remain separate team work.
 
 ## Branching
 
-See `docs/BRANCHING.md`.
+See `docs/BRANCHING.md`. For Paul's feature branches, demo steps, and integration
+review, see [I3/I6 handover](docs/I3-I6-HANDOVER.md).
 
 ## Getting started
 
@@ -56,7 +59,9 @@ dotnet run
 
 The SQLite database is created and seeded automatically on first run from
 `Data/Seed/baggage-manifest.json` (exported from the supplied
-`IAB251_Synthetic_Baggage_Manifest.xlsx`). Delete `aerolink.db` to reseed.
+`IAB251_Synthetic_Baggage_Manifest.xlsx`). Startup adds the I6
+`LoadingCompletions` table to existing databases without deleting their data.
+Deleting `aerolink.db` resets local demo data; it is not required for this update.
 
 Run tests from the repo root:
 
@@ -67,17 +72,26 @@ dotnet test
 ## What's implemented
 
 - **I1** - `Pages/Manifest/Index.cshtml`: select a flight, view its manifest
-  (tag, handling type, status), see loaded vs outstanding counts.
+  (tag, handling type, instructions, status), see loaded, approved-not-to-load,
+  and outstanding counts.
 - **I2** - `Pages/BagVerification/Verify.cshtml`: enter a bag tag, verify it
   against the selected flight's manifest, then confirm loading. Rejects
-  invalid tags, tags from another flight, already-loaded bags, and routes
-  special-handling bags to the I3 acknowledgement step (not yet built) rather
-  than allowing them straight through.
-- Unit tests (`tests/AeroLink.Tests/BagVerificationServiceTests.cs`) cover
-  I2's verification rules using an in-memory SQLite database.
+  invalid tags, tags from another flight, already-loaded bags, open exceptions,
+  approved-not-to-load bags, and completed flights.
+- **I3** - special bags display their category and supplied instructions.
+  Loading requires an acknowledgement for that bag, checked by the server.
+- **I4/I5** - report problems and record Supervisor decisions. These existing
+  services now reject operational changes after I6 completes a flight.
+- **I6** - `Pages/LoadingClosure/Index.cshtml`: reconcile the selected manifest,
+  identify outstanding bags/open exceptions, and let a signed-in Supervisor
+  close a ready flight. A final summary records outcomes, decisions, completion
+  time and Supervisor identity. Completed flights remain available for review.
+- Unit tests in `tests/AeroLink.Tests` cover verification, acknowledgement,
+  exceptions, decisions, closure, authorization, and completed-flight protection.
 
-## Not yet implemented
+## Team integration still to complete
 
-- I3, I4, I5, I6 (teammates), and T2 to T4 (login, logout, live status
-  report). The `NeedsHandlingAcknowledgement` outcome in
-  `BagVerificationOutcome` is the integration point I3 will hook into.
+- Replace local demo authentication with the supplied HR API integration and
+  confirm access rules across the other operational pages.
+- Complete the T4 live loading-status workflow. The I6 readiness page refreshes
+  when requested and rechecks data on closure; it does not auto-refresh.
