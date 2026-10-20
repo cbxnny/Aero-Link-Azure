@@ -52,6 +52,26 @@ public class BagVerificationService : IBagVerificationService
             };
         }
 
+        if (bag.Outcome == "ApprovedNotToLoad")
+        {
+            return new BagVerificationResult
+            {
+                Outcome = BagVerificationOutcome.ApprovedNotToLoad,
+                Bag = bag,
+                Message = $"Bag '{normalisedTag}' has been approved not to load by a Supervisor and cannot be loaded."
+            };
+        }
+
+        if (await _db.Exceptions.AnyAsync(e => e.BagId == bag.BagId && e.Status == "Open"))
+        {
+            return new BagVerificationResult
+            {
+                Outcome = BagVerificationOutcome.HasOpenException,
+                Bag = bag,
+                Message = $"Bag '{normalisedTag}' has an open exception. A Supervisor must resolve it before loading."
+            };
+        }
+
         if (bag.IsSpecialHandling)
         {
             return new BagVerificationResult

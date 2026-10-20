@@ -19,7 +19,13 @@ public enum BagVerificationOutcome
     AlreadyLoaded,
 
     /// <summary>The bag is special-handling and requires acknowledgement first (I3 dependency).</summary>
-    NeedsHandlingAcknowledgement
+    NeedsHandlingAcknowledgement,
+
+    /// <summary>A Supervisor has explicitly approved this bag not to load (I5).</summary>
+    ApprovedNotToLoad,
+
+    /// <summary>An open exception requires a Supervisor decision before loading (I4/I5).</summary>
+    HasOpenException
 }
 
 /// <summary>Result of verifying a bag tag against a flight's manifest.</summary>
