@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace AeroLink.Web.Pages.BagVerification;
 
 /// <summary>
-/// Implements user story I2: a Baggage Employee types a bag tag, the system
+/// Implements user stories I2 and I3: a Baggage Employee types a bag tag, the system
 /// checks it against the selected flight's manifest, and a verified bag can
 /// be confirmed as loaded. Invalid, wrong-flight and already-loaded tags are
-/// rejected without changing the loaded-bag count.
+/// rejected without changing the loaded-bag count. Special bags require explicit
+/// acknowledgement of their handling instructions before confirmation.
 /// </summary>
 public class VerifyModel : PageModel
 {
@@ -34,6 +35,10 @@ public class VerifyModel : PageModel
     [BindProperty]
     public string? Tag { get; set; }
 
+    /// <summary>Whether the employee acknowledged the instructions for this confirmation's bag.</summary>
+    [BindProperty]
+    public bool HandlingAcknowledged { get; set; }
+
     /// <summary>Result of the most recent verify or confirm action, for display.</summary>
     public BagVerificationResult? Result { get; set; }
 
@@ -46,6 +51,8 @@ public class VerifyModel : PageModel
     /// <summary>Checks the entered tag against the manifest without confirming loading.</summary>
     public async Task<IActionResult> OnPostVerifyAsync()
     {
+        HandlingAcknowledged = false;
+        ModelState.Remove(nameof(HandlingAcknowledged));
         Flights = await _manifestService.GetFlightsAsync();
 
         if (!FlightId.HasValue || string.IsNullOrWhiteSpace(Tag))
@@ -58,22 +65,18 @@ public class VerifyModel : PageModel
         return Page();
     }
 
-    /// <summary>Confirms a verified bag as loaded, re-checking the tag first.</summary>
+    /// <summary>Re-checks the bag and passes its handling acknowledgement to the loading service.</summary>
     public async Task<IActionResult> OnPostConfirmAsync()
     {
         Flights = await _manifestService.GetFlightsAsync();
 
-        if (!FlightId.HasValue || string.IsNullOrWhiteSpace(Tag))
+        if (!ModelState.IsValid || !FlightId.HasValue || string.IsNullOrWhiteSpace(Tag))
         {
             ModelState.AddModelError(string.Empty, "Select a flight and enter a bag tag.");
             return Page();
         }
 
-        Result = await _verificationService.ConfirmLoadedAsync(
-            FlightId.Value,
-            Tag,
-            User.Identity?.Name,
-            User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value);
+        Result = await _verificationService.ConfirmLoadedAsync(FlightId.Value, Tag);
         return Page();
     }
 }
