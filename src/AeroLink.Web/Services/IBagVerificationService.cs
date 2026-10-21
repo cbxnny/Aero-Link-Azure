@@ -20,5 +20,5 @@ public interface IBagVerificationService
     /// flight's loaded-bag count. Re-verifies the tag first so a bag cannot
     /// be confirmed twice or out of sequence.
     /// </summary>
-    Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag);
+    Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag, string? performedBy = null, string? userRole = null);
 }

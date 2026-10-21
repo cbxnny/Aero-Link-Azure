@@ -69,7 +69,11 @@ public class VerifyModel : PageModel
             return Page();
         }
 
-        Result = await _verificationService.ConfirmLoadedAsync(FlightId.Value, Tag);
+        Result = await _verificationService.ConfirmLoadedAsync(
+            FlightId.Value,
+            Tag,
+            User.Identity?.Name,
+            User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value);
         return Page();
     }
 }

@@ -15,10 +15,12 @@ namespace AeroLink.Web.Pages;
 public class LoginModel : PageModel
 {
     private readonly IAuthService _authService;
+    private readonly IAuditLogService _auditLog;
 
-    public LoginModel(IAuthService authService)
+    public LoginModel(IAuthService authService, IAuditLogService auditLog)
     {
         _authService = authService;
+        _auditLog = auditLog;
     }
 
     [BindProperty]
@@ -72,6 +74,12 @@ public class LoginModel : PageModel
 
         await SignInUserAsync(result.User, RememberMe);
 
+        await _auditLog.LogAsync(
+            "Login",
+            result.User.FullName,
+            $"{result.User.FullName} ({result.User.EmployeeId}) signed in.",
+            result.User.Role);
+
         if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
         {
             return Redirect(ReturnUrl);
@@ -95,6 +103,12 @@ public class LoginModel : PageModel
         }
 
         await SignInUserAsync(user, rememberMe: true);
+
+        await _auditLog.LogAsync(
+            "Login",
+            user.FullName,
+            $"{user.FullName} ({user.EmployeeId}) signed in (quick login).",
+            user.Role);
 
         if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
         {

@@ -24,6 +24,9 @@ public class AeroLinkDbContext : DbContext
     /// <summary>Reported problems against bags (I4/I5).</summary>
     public DbSet<BaggageException> Exceptions => Set<BaggageException>();
 
+    /// <summary>Audit trail recording every significant operational action.</summary>
+    public DbSet<AuditLogEntry> AuditLog => Set<AuditLogEntry>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

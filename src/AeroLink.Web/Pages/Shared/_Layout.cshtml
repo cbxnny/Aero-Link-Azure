@@ -22,6 +22,13 @@
             <a href="/BagVerification/Verify">Verify Bag</a>
             <a href="/Exceptions/Report">Report Problem</a>
             <a href="/SupervisorReview">Supervisor Review</a>
+            @{
+                var navRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            }
+            @if (navRole == "BG_Supervisor")
+            {
+                <a href="/AuditLog" class="nav-audit">🔒 Audit Log</a>
+            }
         </nav>
 
         <div class="header-user-actions">

@@ -63,6 +63,18 @@ public static class DbSeeder
                 ""DecidedByEmployeeName"" TEXT NULL,
                 CONSTRAINT ""FK_Exceptions_Bags_BagId"" FOREIGN KEY (""BagId"") REFERENCES ""Bags"" (""BagId"") ON DELETE CASCADE
             );
+
+            CREATE TABLE IF NOT EXISTS ""AuditLog"" (
+                ""AuditLogEntryId"" INTEGER NOT NULL CONSTRAINT ""PK_AuditLog"" PRIMARY KEY AUTOINCREMENT,
+                ""TimestampUtc"" TEXT NOT NULL,
+                ""Action"" TEXT NOT NULL DEFAULT '',
+                ""PerformedBy"" TEXT NOT NULL DEFAULT '',
+                ""UserRole"" TEXT NULL,
+                ""FlightId"" INTEGER NULL,
+                ""FlightNumber"" TEXT NULL,
+                ""BagTag"" TEXT NULL,
+                ""Details"" TEXT NOT NULL DEFAULT ''
+            );
         ");
 
         if (db.Flights.Any())

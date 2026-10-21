@@ -8,11 +8,13 @@ namespace AeroLink.Web.Services;
 public class SupervisorReviewService : ISupervisorReviewService
 {
     private readonly AeroLinkDbContext _db;
+    private readonly IAuditLogService _auditLog;
 
-    /// <summary>Creates the service with an injected database context.</summary>
-    public SupervisorReviewService(AeroLinkDbContext db)
+    /// <summary>Creates the service with injected database context and optional audit log.</summary>
+    public SupervisorReviewService(AeroLinkDbContext db, IAuditLogService? auditLog = null)
     {
         _db = db;
+        _auditLog = auditLog ?? new AuditLogService(db);
     }
 
     /// <inheritdoc />
@@ -33,7 +35,9 @@ public class SupervisorReviewService : ISupervisorReviewService
     /// <inheritdoc />
     public async Task<ExceptionDecisionResult> ResolveAsync(int exceptionId, string reason, string? decidedByEmployeeName)
     {
-        var exception = await _db.Exceptions.FindAsync(exceptionId);
+        var exception = await _db.Exceptions
+            .Include(e => e.Bag)
+            .FirstOrDefaultAsync(e => e.ExceptionId == exceptionId);
 
         if (exception is null || exception.Status != "Open")
         {
@@ -51,6 +55,18 @@ public class SupervisorReviewService : ISupervisorReviewService
         exception.DecidedByEmployeeName = decidedByEmployeeName;
 
         await _db.SaveChangesAsync();
+
+        // Audit log: exception resolved
+        var flight = await _db.Flights.FindAsync(exception.FlightId);
+        await _auditLog.LogAsync(
+            "ExceptionResolved",
+            decidedByEmployeeName ?? "Unknown",
+            $"Exception #{exceptionId} resolved for bag '{exception.Bag?.Tag}': {reason.Trim()}",
+            "BG_Supervisor",
+            exception.FlightId,
+            flight?.FlightNumber,
+            exception.Bag?.Tag);
+
         return new ExceptionDecisionResult { Success = true, Message = "Problem resolved. The bag remains pending for loading." };
     }
 
@@ -82,6 +98,19 @@ public class SupervisorReviewService : ISupervisorReviewService
         }
 
         await _db.SaveChangesAsync();
+
+        // Audit log: approved not to load
+        var flight = await _db.Flights.FindAsync(exception.FlightId);
+        await _auditLog.LogAsync(
+            "ApprovedNotToLoad",
+            decidedByEmployeeName ?? "Unknown",
+            $"Bag '{exception.Bag?.Tag}' approved not to load: {reason.Trim()}",
+            "BG_Supervisor",
+            exception.FlightId,
+            flight?.FlightNumber,
+            exception.Bag?.Tag);
+
         return new ExceptionDecisionResult { Success = true, Message = "Bag approved not to load." };
     }
 }
+

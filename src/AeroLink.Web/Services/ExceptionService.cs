@@ -8,11 +8,13 @@ namespace AeroLink.Web.Services;
 public class ExceptionService : IExceptionService
 {
     private readonly AeroLinkDbContext _db;
+    private readonly IAuditLogService _auditLog;
 
-    /// <summary>Creates the service with an injected database context.</summary>
-    public ExceptionService(AeroLinkDbContext db)
+    /// <summary>Creates the service with injected database context and optional audit log.</summary>
+    public ExceptionService(AeroLinkDbContext db, IAuditLogService? auditLog = null)
     {
         _db = db;
+        _auditLog = auditLog ?? new AuditLogService(db);
     }
 
     /// <inheritdoc />
@@ -82,6 +84,17 @@ public class ExceptionService : IExceptionService
         _db.Exceptions.Add(exception);
         await _db.SaveChangesAsync();
 
+        // Audit log: exception raised
+        var flight = await _db.Flights.FindAsync(flightId);
+        await _auditLog.LogAsync(
+            "ExceptionRaised",
+            reportedByEmployeeName ?? "Unknown",
+            $"Exception reported for bag '{normalisedTag}': {exception.Category} – {exception.Description}",
+            null,
+            flightId,
+            flight?.FlightNumber,
+            normalisedTag);
+
         return new ExceptionReportResult
         {
             Outcome = ExceptionReportOutcome.Reported,
@@ -90,3 +103,4 @@ public class ExceptionService : IExceptionService
         };
     }
 }
+

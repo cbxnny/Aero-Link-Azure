@@ -1,0 +1,161 @@
+@page
+@model AeroLink.Web.Pages.AuditLog.IndexModel
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<div class="audit-hero">
+    <div class="audit-hero-inner">
+        <div class="audit-hero-icon">🔒</div>
+        <div>
+            <h1>Audit Log</h1>
+            <p class="audit-hero-subtitle">Complete operational history &mdash; Supervisor view only</p>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card audit-filters-card">
+    <form method="get" class="audit-filters-form" id="audit-filters-form">
+        <div class="filter-group">
+            <label for="filter-flight">Flight</label>
+            <select id="filter-flight" name="FlightId">
+                <option value="">All Flights</option>
+                @foreach (var flight in Model.Flights)
+                {
+                    <option value="@flight.FlightId"
+                            selected="@(Model.FlightId == flight.FlightId)">
+                        @flight.FlightNumber &mdash; @flight.DepartureAirport → @flight.ArrivalAirport
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-action">Action</label>
+            <select id="filter-action" name="ActionFilter">
+                <option value="">All Actions</option>
+                @foreach (var action in AeroLink.Web.Pages.AuditLog.IndexModel.ActionCategories)
+                {
+                    <option value="@action"
+                            selected="@(Model.ActionFilter == action)">
+                        @action
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="filter-user">User</label>
+            <input type="text" id="filter-user" name="UserFilter"
+                   value="@Model.UserFilter" placeholder="Search by name…" />
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="btn btn-primary">
+                🔍 Apply Filters
+            </button>
+            <a href="/AuditLog" class="btn btn-secondary">Clear</a>
+        </div>
+    </form>
+</div>
+
+<!-- Results Summary -->
+<div class="audit-results-summary">
+    <span class="results-count">
+        <strong>@Model.TotalEntries</strong> @(Model.TotalEntries == 1 ? "entry" : "entries") found
+    </span>
+    @if (Model.FlightId.HasValue || !string.IsNullOrEmpty(Model.ActionFilter) || !string.IsNullOrEmpty(Model.UserFilter))
+    {
+        <span class="filter-active-badge">Filters active</span>
+    }
+</div>
+
+@if (!Model.Entries.Any())
+{
+    <div class="card audit-empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No audit log entries match the current filters.</p>
+        <p class="subtext">Actions will appear here as employees use the system.</p>
+    </div>
+}
+else
+{
+    <div class="card audit-table-card">
+        <div class="audit-table-scroll">
+            <table class="audit-table" id="audit-log-table">
+                <thead>
+                    <tr>
+                        <th class="col-time">Timestamp (UTC)</th>
+                        <th class="col-action">Action</th>
+                        <th class="col-user">User</th>
+                        <th class="col-role">Role</th>
+                        <th class="col-flight">Flight</th>
+                        <th class="col-tag">Bag Tag</th>
+                        <th class="col-details">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model.Entries)
+                    {
+                        var actionClass = entry.Action switch
+                        {
+                            "Login" => "action-login",
+                            "Logout" => "action-logout",
+                            "BagLoaded" => "action-loaded",
+                            "BagRejected" => "action-rejected",
+                            "ExceptionRaised" => "action-exception",
+                            "ExceptionResolved" => "action-resolved",
+                            "ApprovedNotToLoad" => "action-notload",
+                            "LoadingClosed" => "action-closed",
+                            "SpecialHandlingAcknowledged" => "action-special",
+                            _ => "action-default"
+                        };
+                        <tr>
+                            <td class="col-time">
+                                <span class="timestamp">@entry.TimestampUtc.ToString("dd MMM yyyy")</span>
+                                <span class="timestamp-time">@entry.TimestampUtc.ToString("HH:mm:ss")</span>
+                            </td>
+                            <td class="col-action">
+                                <span class="action-badge @actionClass">@entry.Action</span>
+                            </td>
+                            <td class="col-user">@entry.PerformedBy</td>
+                            <td class="col-role">
+                                @if (entry.UserRole == "BG_Supervisor")
+                                {
+                                    <span class="badge badge-supervisor">Supervisor</span>
+                                }
+                                else if (entry.UserRole == "BG_Handler")
+                                {
+                                    <span class="badge badge-handler">Handler</span>
+                                }
+                                else
+                                {
+                                    <span class="subtext">—</span>
+                                }
+                            </td>
+                            <td class="col-flight">
+                                @if (!string.IsNullOrEmpty(entry.FlightNumber))
+                                {
+                                    <span class="airport-pill">@entry.FlightNumber</span>
+                                }
+                                else
+                                {
+                                    <span class="subtext">—</span>
+                                }
+                            </td>
+                            <td class="col-tag">
+                                @if (!string.IsNullOrEmpty(entry.BagTag))
+                                {
+                                    <code class="tag-code">@entry.BagTag</code>
+                                }
+                                else
+                                {
+                                    <span class="subtext">—</span>
+                                }
+                            </td>
+                            <td class="col-details">@entry.Details</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
