@@ -12,7 +12,7 @@ public interface IBagVerificationService
     /// Checks a bag tag against the selected flight's manifest without
     /// changing any data. Rejects tags that are invalid, belong to another
     /// flight, or have already been loaded. Also blocks bags approved not to
-    /// load or with an open exception recorded by the I4/I5 workflow.
+    /// load, with an open exception recorded by I4/I5, or on a completed flight.
     /// </summary>
     Task<BagVerificationResult> VerifyAsync(int flightId, string tag);
 

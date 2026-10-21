@@ -15,13 +15,14 @@ public interface ISupervisorReviewService
     /// <summary>
     /// Resolves the reported problem. The bag's outcome is left unchanged
     /// (Pending), so it can still be loaded normally through I2.
+    /// Rejects changes to completed flights.
     /// </summary>
     Task<ExceptionDecisionResult> ResolveAsync(int exceptionId, string reason, string? decidedByEmployeeName);
 
     /// <summary>
     /// Explicitly approves the bag not to be loaded. Sets the bag's outcome
     /// to ApprovedNotToLoad, which I6 counts as accounted-for when checking
-    /// whether loading can be closed.
+    /// whether loading can be closed. Rejects changes to completed flights.
     /// </summary>
     Task<ExceptionDecisionResult> ApproveNotToLoadAsync(int exceptionId, string reason, string? decidedByEmployeeName);
 }

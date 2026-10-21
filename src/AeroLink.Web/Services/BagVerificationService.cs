@@ -42,6 +42,16 @@ public class BagVerificationService : IBagVerificationService
             };
         }
 
+        if (await _db.Flights.AnyAsync(f => f.FlightId == flightId && f.LoadingStatus == "Completed"))
+        {
+            return new BagVerificationResult
+            {
+                Outcome = BagVerificationOutcome.FlightCompleted,
+                Bag = bag,
+                Message = "Loading for this flight is completed. The final record is read-only."
+            };
+        }
+
         if (bag.IsLoaded)
         {
             return new BagVerificationResult
@@ -94,6 +104,7 @@ public class BagVerificationService : IBagVerificationService
     /// <inheritdoc />
     public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag, bool handlingAcknowledged = false)
     {
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var result = await VerifyAsync(flightId, tag);
 
         if (result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement && handlingAcknowledged)
@@ -109,6 +120,7 @@ public class BagVerificationService : IBagVerificationService
         result.Bag.Outcome = "Loaded";
         result.Bag.LoadedAtUtc = DateTime.UtcNow;
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         result.Message = $"Bag '{result.Bag.Tag}' confirmed as loaded.";
         return result;

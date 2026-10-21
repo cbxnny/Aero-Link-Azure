@@ -22,6 +22,10 @@
             <a href="/BagVerification/Verify">Verify Bag</a>
             <a href="/Exceptions/Report">Report Problem</a>
             <a href="/SupervisorReview">Supervisor Review</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="/LoadingClosure">Loading Completion</a>
+            }
         </nav>
 
         <div class="header-user-actions">

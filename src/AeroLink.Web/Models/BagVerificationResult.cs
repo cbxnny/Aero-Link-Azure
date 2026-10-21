@@ -25,7 +25,10 @@ public enum BagVerificationOutcome
     ApprovedNotToLoad,
 
     /// <summary>An open exception requires a Supervisor decision before loading (I4/I5).</summary>
-    HasOpenException
+    HasOpenException,
+
+    /// <summary>The flight's loading has been finalised and is read-only (I6).</summary>
+    FlightCompleted
 }
 
 /// <summary>Result of verifying a bag tag against a flight's manifest.</summary>

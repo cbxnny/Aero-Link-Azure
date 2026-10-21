@@ -23,6 +23,7 @@ public class ExceptionService : IExceptionService
         string description,
         string? reportedByEmployeeName)
     {
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var normalisedTag = (tag ?? string.Empty).Trim();
 
         var bag = await _db.Bags
@@ -43,6 +44,15 @@ public class ExceptionService : IExceptionService
             {
                 Outcome = ExceptionReportOutcome.WrongFlight,
                 Message = $"Bag '{normalisedTag}' belongs to a different flight."
+            };
+        }
+
+        if (await _db.Flights.AnyAsync(f => f.FlightId == flightId && f.LoadingStatus == "Completed"))
+        {
+            return new ExceptionReportResult
+            {
+                Outcome = ExceptionReportOutcome.FlightCompleted,
+                Message = "Loading for this flight is completed. No further problems can be recorded against the final record."
             };
         }
 
@@ -81,6 +91,7 @@ public class ExceptionService : IExceptionService
 
         _db.Exceptions.Add(exception);
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return new ExceptionReportResult
         {
