@@ -8,11 +8,13 @@ namespace AeroLink.Web.Services;
 public class SupervisorReviewService : ISupervisorReviewService
 {
     private readonly AeroLinkDbContext _db;
+    private readonly IAuditLogService _auditLog;
 
-    /// <summary>Creates the service with an injected database context.</summary>
-    public SupervisorReviewService(AeroLinkDbContext db)
+    /// <summary>Creates the service with injected database context and optional audit log.</summary>
+    public SupervisorReviewService(AeroLinkDbContext db, IAuditLogService? auditLog = null)
     {
         _db = db;
+        _auditLog = auditLog ?? new AuditLogService(db);
     }
 
     /// <inheritdoc />
@@ -33,7 +35,6 @@ public class SupervisorReviewService : ISupervisorReviewService
     /// <inheritdoc />
     public async Task<ExceptionDecisionResult> ResolveAsync(int exceptionId, string reason, string? decidedByEmployeeName)
     {
-        await using var transaction = await _db.Database.BeginTransactionAsync();
         var exception = await _db.Exceptions.FindAsync(exceptionId);
 
         if (exception is null || exception.Status != "Open")
@@ -57,7 +58,6 @@ public class SupervisorReviewService : ISupervisorReviewService
         exception.DecidedByEmployeeName = decidedByEmployeeName;
 
         await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
         return new ExceptionDecisionResult { Success = true, Message = "Problem resolved. The bag remains pending for loading." };
     }
 
@@ -95,7 +95,7 @@ public class SupervisorReviewService : ISupervisorReviewService
         }
 
         await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
         return new ExceptionDecisionResult { Success = true, Message = "Bag approved not to load." };
     }
 }
+

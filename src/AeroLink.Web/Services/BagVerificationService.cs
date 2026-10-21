@@ -8,11 +8,13 @@ namespace AeroLink.Web.Services;
 public class BagVerificationService : IBagVerificationService
 {
     private readonly AeroLinkDbContext _db;
+    private readonly IAuditLogService _auditLog;
 
-    /// <summary>Creates the service with an injected database context.</summary>
-    public BagVerificationService(AeroLinkDbContext db)
+    /// <summary>Creates the service with injected database context and optional audit log.</summary>
+    public BagVerificationService(AeroLinkDbContext db, IAuditLogService? auditLog = null)
     {
         _db = db;
+        _auditLog = auditLog ?? new AuditLogService(db);
     }
 
     /// <inheritdoc />
@@ -102,18 +104,33 @@ public class BagVerificationService : IBagVerificationService
     }
 
     /// <inheritdoc />
-    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag, bool handlingAcknowledged = false)
+    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag)
     {
         await using var transaction = await _db.Database.BeginTransactionAsync();
         var result = await VerifyAsync(flightId, tag);
 
-        if (result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement && handlingAcknowledged)
-        {
-            result.Outcome = BagVerificationOutcome.Verified;
-        }
-
         if (!result.CanConfirmLoad || result.Bag is null)
         {
+            // Log rejection
+            var rejectionReason = result.Outcome switch
+            {
+                BagVerificationOutcome.InvalidTag => "Invalid tag",
+                BagVerificationOutcome.WrongFlight => "Wrong flight",
+                BagVerificationOutcome.AlreadyLoaded => "Already loaded",
+                BagVerificationOutcome.NeedsHandlingAcknowledgement => "Special handling not acknowledged",
+                _ => "Verification failed"
+            };
+
+            var flight = await _db.Flights.FindAsync(flightId);
+            await _auditLog.LogAsync(
+                "BagRejected",
+                user,
+                $"Bag tag '{(tag ?? "").Trim()}' rejected: {rejectionReason}.",
+                userRole,
+                flightId,
+                flight?.FlightNumber,
+                (tag ?? "").Trim());
+
             return result;
         }
 
@@ -122,7 +139,19 @@ public class BagVerificationService : IBagVerificationService
         await _db.SaveChangesAsync();
         await transaction.CommitAsync();
 
+        // Log successful load
+        var loadFlight = await _db.Flights.FindAsync(flightId);
+        await _auditLog.LogAsync(
+            "BagLoaded",
+            user,
+            $"Bag '{result.Bag.Tag}' confirmed as loaded.",
+            userRole,
+            flightId,
+            loadFlight?.FlightNumber,
+            result.Bag.Tag);
+
         result.Message = $"Bag '{result.Bag.Tag}' confirmed as loaded.";
         return result;
     }
 }
+

@@ -15,7 +15,6 @@ builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
 builder.Services.AddScoped<IExceptionService, ExceptionService>();
 builder.Services.AddScoped<ISupervisorReviewService, SupervisorReviewService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ILoadingClosureService, LoadingClosureService>();
 
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

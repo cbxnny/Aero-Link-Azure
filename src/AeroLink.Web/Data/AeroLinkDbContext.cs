@@ -24,9 +24,6 @@ public class AeroLinkDbContext : DbContext
     /// <summary>Reported problems against bags (I4/I5).</summary>
     public DbSet<BaggageException> Exceptions => Set<BaggageException>();
 
-    /// <summary>Permanent final loading summaries, with one record per completed flight.</summary>
-    public DbSet<LoadingCompletion> LoadingCompletions => Set<LoadingCompletion>();
-
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

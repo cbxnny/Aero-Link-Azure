@@ -23,12 +23,5 @@ public interface IBagVerificationService
     /// Special bags require acknowledgement with this request; acknowledgement
     /// never overrides an exception or a Supervisor's not-to-load decision.
     /// </summary>
-    /// <param name="flightId">The departure flight the employee is loading.</param>
-    /// <param name="tag">The bag tag to re-verify and confirm.</param>
-    /// <param name="handlingAcknowledged">
-    /// Whether the employee acknowledged this bag's supplied handling instructions.
-    /// Defaults to false and is not carried over to another confirmation.
-    /// </param>
-    /// <returns>The verification outcome and bag; successful loading also records a UTC timestamp.</returns>
-    Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag, bool handlingAcknowledged = false);
+    Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag);
 }

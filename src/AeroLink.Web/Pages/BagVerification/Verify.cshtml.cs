@@ -76,7 +76,7 @@ public class VerifyModel : PageModel
             return Page();
         }
 
-        Result = await _verificationService.ConfirmLoadedAsync(FlightId.Value, Tag, HandlingAcknowledged);
+        Result = await _verificationService.ConfirmLoadedAsync(FlightId.Value, Tag);
         return Page();
     }
 }
