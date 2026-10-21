@@ -1,5 +1,6 @@
 using AeroLink.Web.Models;
 using AeroLink.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -11,6 +12,7 @@ namespace AeroLink.Web.Pages.SupervisorReview;
 /// loading) or explicitly approves the bag not to load, recording a reason
 /// either way.
 /// </summary>
+[Authorize(Roles = "BG_Supervisor")]
 public class IndexModel : PageModel
 {
     private readonly ISupervisorReviewService _reviewService;

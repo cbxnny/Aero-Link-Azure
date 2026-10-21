@@ -10,9 +10,14 @@ namespace AeroLink.Web.Services;
 public class LoadingClosureService : ILoadingClosureService
 {
     private readonly AeroLinkDbContext _db;
+    private readonly IAuditLogService _auditLog;
 
-    /// <summary>Creates the service using the request's SQLite database context.</summary>
-    public LoadingClosureService(AeroLinkDbContext db) => _db = db;
+    /// <summary>Creates the service using the request's SQLite database context and audit log.</summary>
+    public LoadingClosureService(AeroLinkDbContext db, IAuditLogService? auditLog = null)
+    {
+        _db = db;
+        _auditLog = auditLog ?? new AuditLogService(db);
+    }
 
     /// <inheritdoc />
     public async Task<LoadingReadiness?> GetReadinessAsync(int flightId)
@@ -82,6 +87,17 @@ public class LoadingClosureService : ILoadingClosureService
             .ExecuteUpdateAsync(s => s.SetProperty(f => f.LoadingStatus, "Completed"));
         _db.LoadingCompletions.Add(completion);
         await _db.SaveChangesAsync();
+
+        // Logged before the commit so the closure and its audit entry are saved together.
+        await _auditLog.LogAsync(
+            "LoadingClosed",
+            completion.CompletedByName,
+            $"Loading closed for {flight.FlightNumber}: {readiness.LoadedCount} loaded, " +
+            $"{readiness.ApprovedNotToLoadCount} approved not to load, {readiness.ExpectedCount} expected.",
+            "BG_Supervisor",
+            flightId,
+            flight.FlightNumber);
+
         await transaction.CommitAsync();
         return new(LoadingClosureOutcome.Completed, "Loading completed. The final summary is now available.", completion);
     }

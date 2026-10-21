@@ -4,6 +4,11 @@
     ViewData["Title"] = "Verify Bag";
 }
 
+@if (Model.Flights.Any(f => f.FlightId == Model.FlightId && f.LoadingStatus == "Completed"))
+{
+    <partial name="_ClosedBanner" />
+}
+
 <div class="card">
     <h1>Verify Bag Tag</h1>
     <p>Enter a bag tag to check it against the selected flight's manifest before confirming loading.</p>

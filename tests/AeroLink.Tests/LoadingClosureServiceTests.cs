@@ -234,6 +234,42 @@ public class LoadingClosureServiceTests : IDisposable
         Assert.Equal(LoadingClosureOutcome.Completed, (await _sut.CloseAsync(1, Employee())).Outcome);
     }
 
+    [Fact]
+    public async Task Close_Completed_WritesLoadingClosedAuditEntry()
+    {
+        await LoadAllAsync();
+
+        var result = await _sut.CloseAsync(1, Employee());
+
+        Assert.Equal(LoadingClosureOutcome.Completed, result.Outcome);
+        var entry = Assert.Single(await _db.AuditLog.AsNoTracking().Where(e => e.Action == "LoadingClosed").ToListAsync());
+        Assert.Equal("Test Supervisor", entry.PerformedBy);
+        Assert.Equal("BG_Supervisor", entry.UserRole);
+        Assert.Equal(1, entry.FlightId);
+        Assert.Equal("DEMO101", entry.FlightNumber);
+    }
+
+    [Fact]
+    public async Task Close_Blocked_DoesNotWriteLoadingClosedAuditEntry()
+    {
+        var result = await _sut.CloseAsync(1, Employee());
+
+        Assert.Equal(LoadingClosureOutcome.Blocked, result.Outcome);
+        Assert.Empty(await _db.AuditLog.AsNoTracking().Where(e => e.Action == "LoadingClosed").ToListAsync());
+    }
+
+    [Fact]
+    public async Task Close_RepeatedRequest_WritesOnlyOneLoadingClosedAuditEntry()
+    {
+        await LoadAllAsync();
+
+        await _sut.CloseAsync(1, Employee());
+        var second = await _sut.CloseAsync(1, Employee());
+
+        Assert.Equal(LoadingClosureOutcome.AlreadyCompleted, second.Outcome);
+        Assert.Single(await _db.AuditLog.AsNoTracking().Where(e => e.Action == "LoadingClosed").ToListAsync());
+    }
+
     public void Dispose()
     {
         _db.Dispose();

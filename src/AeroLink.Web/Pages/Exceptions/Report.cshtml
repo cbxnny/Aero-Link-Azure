@@ -4,6 +4,11 @@
     ViewData["Title"] = "Report a Problem";
 }
 
+@if (Model.Flights.Any(f => f.FlightId == Model.FlightId && f.LoadingStatus == "Completed"))
+{
+    <partial name="_ClosedBanner" />
+}
+
 <div class="card">
     <h1>Report a Problem</h1>
     <p>Enter the bag tag with a problem so a Supervisor can investigate it before loading closes.</p>

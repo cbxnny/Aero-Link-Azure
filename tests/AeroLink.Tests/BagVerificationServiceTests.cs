@@ -122,6 +122,28 @@ public class BagVerificationServiceTests : IDisposable
         Assert.Equal("Pending", _db.Bags.First(b => b.Tag == "TAG-004").Outcome);
     }
 
+    [Fact]
+    public async Task ConfirmLoadedAsync_RejectedTag_IsRecordedInAuditLog()
+    {
+        await _sut.ConfirmLoadedAsync(flightId: 1, tag: "NOT-A-REAL-TAG", performedBy: "David Miller", userRole: "BG_Handler");
+
+        var entry = Assert.Single(_db.AuditLog.AsNoTracking().ToList());
+        Assert.Equal("BagRejected", entry.Action);
+        Assert.Equal("David Miller", entry.PerformedBy);
+        Assert.Equal("NOT-A-REAL-TAG", entry.BagTag);
+        Assert.Equal(1, entry.FlightId);
+    }
+
+    [Fact]
+    public async Task ConfirmLoadedAsync_ValidTag_IsRecordedInAuditLog()
+    {
+        await _sut.ConfirmLoadedAsync(flightId: 1, tag: "TAG-001", performedBy: "David Miller", userRole: "BG_Handler");
+
+        var entry = Assert.Single(_db.AuditLog.AsNoTracking().ToList());
+        Assert.Equal("BagLoaded", entry.Action);
+        Assert.Equal("TAG-001", entry.BagTag);
+    }
+
     public void Dispose()
     {
         _db.Dispose();
