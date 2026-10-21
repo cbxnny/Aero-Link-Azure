@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<AeroLinkDbContext>(options =>
