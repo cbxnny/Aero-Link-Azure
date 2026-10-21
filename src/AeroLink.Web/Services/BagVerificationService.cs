@@ -52,6 +52,26 @@ public class BagVerificationService : IBagVerificationService
             };
         }
 
+        if (bag.Outcome == "ApprovedNotToLoad")
+        {
+            return new BagVerificationResult
+            {
+                Outcome = BagVerificationOutcome.ApprovedNotToLoad,
+                Bag = bag,
+                Message = $"Bag '{normalisedTag}' has been approved not to load by a Supervisor and cannot be loaded."
+            };
+        }
+
+        if (await _db.Exceptions.AnyAsync(e => e.BagId == bag.BagId && e.Status == "Open"))
+        {
+            return new BagVerificationResult
+            {
+                Outcome = BagVerificationOutcome.HasOpenException,
+                Bag = bag,
+                Message = $"Bag '{normalisedTag}' has an open exception. A Supervisor must resolve it before loading."
+            };
+        }
+
         if (bag.IsSpecialHandling)
         {
             return new BagVerificationResult
@@ -72,9 +92,14 @@ public class BagVerificationService : IBagVerificationService
     }
 
     /// <inheritdoc />
-    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag)
+    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag, bool handlingAcknowledged = false)
     {
         var result = await VerifyAsync(flightId, tag);
+
+        if (result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement && handlingAcknowledged)
+        {
+            result.Outcome = BagVerificationOutcome.Verified;
+        }
 
         if (!result.CanConfirmLoad || result.Bag is null)
         {

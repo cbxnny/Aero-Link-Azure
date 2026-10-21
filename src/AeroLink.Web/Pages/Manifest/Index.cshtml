@@ -47,6 +47,7 @@
                 <tr>
                     <th>Bag tag</th>
                     <th>Handling type</th>
+                    <th>Handling instructions</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -62,6 +63,7 @@
                                 <span class="badge badge-special">Special</span>
                             }
                         </td>
+                        <td>@bag.HandlingInstruction</td>
                         <td>
                             @if (bag.IsLoaded)
                             {

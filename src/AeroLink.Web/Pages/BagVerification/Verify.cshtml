@@ -34,10 +34,6 @@
         <input type="text" id="Tag" name="Tag" asp-for="Tag" placeholder="e.g. DEMO-101-001" autocomplete="off" />
 
         <button class="btn" type="submit" asp-page-handler="Verify">Verify</button>
-        @if (Model.Result?.CanConfirmLoad == true)
-        {
-            <button class="btn" type="submit" asp-page-handler="Confirm" style="background:#1e6b2a;">Confirm loaded</button>
-        }
     </form>
 </div>
 
@@ -74,6 +70,52 @@
                     </tr>
                 </tbody>
             </table>
+
+            @if (!Model.Result.Bag.IsLoaded &&
+                (Model.Result.CanConfirmLoad || Model.Result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement))
+            {
+                <form method="post" asp-page-handler="Confirm" id="loading-confirmation">
+                    <h2>Confirm loading for @Model.Result.Bag.Tag</h2>
+                    <input type="hidden" name="FlightId" value="@Model.Result.Bag.FlightId" />
+                    <input type="hidden" name="Tag" value="@Model.Result.Bag.Tag" />
+
+                    @if (Model.Result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement)
+                    {
+                        <p>Acknowledge the handling instructions above before confirming this bag as loaded.</p>
+                        <div class="form-row-checkbox">
+                            <label class="checkbox-label" for="HandlingAcknowledged">
+                                <input type="checkbox" id="HandlingAcknowledged" name="HandlingAcknowledged" value="true" required />
+                                I acknowledge the handling instructions for bag @Model.Result.Bag.Tag.
+                            </label>
+                        </div>
+                    }
+
+                    <button class="btn btn-primary" type="submit" id="confirm-loaded">Confirm loaded</button>
+                </form>
+            }
         </div>
     }
 }
+
+<script>
+    const confirmationForm = document.getElementById('loading-confirmation');
+    if (confirmationForm) {
+        const acknowledgement = document.getElementById('HandlingAcknowledged');
+        const confirmButton = document.getElementById('confirm-loaded');
+        if (acknowledgement) {
+            confirmButton.disabled = !acknowledgement.checked;
+            acknowledgement.addEventListener('change', () => {
+                confirmButton.disabled = !acknowledgement.checked;
+            });
+        }
+
+        // Changing the selected bag requires verification and fresh acknowledgement.
+        for (const fieldId of ['FlightId', 'Tag']) {
+            document.getElementById(fieldId).addEventListener('input', () => {
+                confirmationForm.hidden = true;
+                confirmButton.disabled = true;
+                if (acknowledgement) acknowledgement.checked = false;
+            });
+        }
+    }
+</script>
