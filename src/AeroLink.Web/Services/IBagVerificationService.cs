@@ -23,5 +23,19 @@ public interface IBagVerificationService
     /// Special bags require acknowledgement with this request; acknowledgement
     /// never overrides an exception or a Supervisor's not-to-load decision.
     /// </summary>
-    Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag);
+    Task<BagVerificationResult> ConfirmLoadedAsync(
+        int flightId,
+        string tag,
+        bool handlingAcknowledged = false,
+        string? performedBy = null,
+        string? userRole = null);
+
+    /// <summary>
+    /// Confirms a previously verified bag as loaded with performedBy and userRole metadata for audit logging.
+    /// </summary>
+    Task<BagVerificationResult> ConfirmLoadedAsync(
+        int flightId,
+        string tag,
+        string? performedBy,
+        string? userRole = null);
 }

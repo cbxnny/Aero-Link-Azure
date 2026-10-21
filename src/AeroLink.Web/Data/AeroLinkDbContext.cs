@@ -24,6 +24,12 @@ public class AeroLinkDbContext : DbContext
     /// <summary>Reported problems against bags (I4/I5).</summary>
     public DbSet<BaggageException> Exceptions => Set<BaggageException>();
 
+    /// <summary>Permanent final loading summaries, with one record per completed flight.</summary>
+    public DbSet<LoadingCompletion> LoadingCompletions => Set<LoadingCompletion>();
+
+    /// <summary>Audit trail recording every significant operational action.</summary>
+    public DbSet<AuditLogEntry> AuditLog => Set<AuditLogEntry>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,6 +53,10 @@ public class AeroLinkDbContext : DbContext
         modelBuilder.Entity<LoadingCompletion>().Property(c => c.FlightId).ValueGeneratedNever();
         modelBuilder.Entity<LoadingCompletion>().HasOne<Flight>().WithOne()
             .HasForeignKey<LoadingCompletion>(c => c.FlightId).OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<AuditLogEntry>()
+            .ToTable("AuditLog")
+            .HasKey(e => e.AuditLogEntryId);
 
         base.OnModelCreating(modelBuilder);
     }

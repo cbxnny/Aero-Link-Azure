@@ -76,7 +76,10 @@ public class VerifyModel : PageModel
             return Page();
         }
 
-        Result = await _verificationService.ConfirmLoadedAsync(FlightId.Value, Tag);
+        var performedBy = User.Identity?.Name ?? "Unknown";
+        var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+        Result = await _verificationService.ConfirmLoadedAsync(FlightId.Value, Tag, HandlingAcknowledged, performedBy, userRole);
         return Page();
     }
 }

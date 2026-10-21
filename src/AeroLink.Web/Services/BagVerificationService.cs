@@ -104,10 +104,21 @@ public class BagVerificationService : IBagVerificationService
     }
 
     /// <inheritdoc />
-    public async Task<BagVerificationResult> ConfirmLoadedAsync(int flightId, string tag)
+    public async Task<BagVerificationResult> ConfirmLoadedAsync(
+        int flightId,
+        string tag,
+        bool handlingAcknowledged = false,
+        string? performedBy = null,
+        string? userRole = null)
     {
         await using var transaction = await _db.Database.BeginTransactionAsync();
         var result = await VerifyAsync(flightId, tag);
+        var user = performedBy ?? "Unknown";
+
+        if (result.Outcome == BagVerificationOutcome.NeedsHandlingAcknowledgement && handlingAcknowledged)
+        {
+            result.Outcome = BagVerificationOutcome.Verified;
+        }
 
         if (!result.CanConfirmLoad || result.Bag is null)
         {
@@ -118,6 +129,9 @@ public class BagVerificationService : IBagVerificationService
                 BagVerificationOutcome.WrongFlight => "Wrong flight",
                 BagVerificationOutcome.AlreadyLoaded => "Already loaded",
                 BagVerificationOutcome.NeedsHandlingAcknowledgement => "Special handling not acknowledged",
+                BagVerificationOutcome.ApprovedNotToLoad => "Approved not to load",
+                BagVerificationOutcome.HasOpenException => "Has open exception",
+                BagVerificationOutcome.FlightCompleted => "Flight loading completed",
                 _ => "Verification failed"
             };
 
@@ -153,5 +167,13 @@ public class BagVerificationService : IBagVerificationService
         result.Message = $"Bag '{result.Bag.Tag}' confirmed as loaded.";
         return result;
     }
+
+    /// <inheritdoc />
+    public Task<BagVerificationResult> ConfirmLoadedAsync(
+        int flightId,
+        string tag,
+        string? performedBy,
+        string? userRole = null) =>
+        ConfirmLoadedAsync(flightId, tag, handlingAcknowledged: false, performedBy: performedBy, userRole: userRole);
 }
 
