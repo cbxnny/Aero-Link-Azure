@@ -35,6 +35,11 @@
     var loadedCount = flight.Bags.Count(b => b.IsLoaded);
     var approvedCount = flight.Bags.Count(b => b.Outcome == "ApprovedNotToLoad");
 
+    if (flight.LoadingStatus == "Completed")
+    {
+        <partial name="_ClosedBanner" />
+    }
+
     <div class="card">
         <h2>@flight.FlightLabel &middot; @flight.FlightNumber (@flight.DepartureAirport &rarr; @flight.ArrivalAirport)</h2>
         <p>Loading status: <strong>@flight.LoadingStatus</strong></p>

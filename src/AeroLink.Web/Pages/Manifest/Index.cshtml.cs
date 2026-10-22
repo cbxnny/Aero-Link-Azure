@@ -1,5 +1,6 @@
 using AeroLink.Web.Models;
 using AeroLink.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -10,6 +11,7 @@ namespace AeroLink.Web.Pages.Manifest;
 /// and views the list of bags expected on it, with tag, handling type and
 /// current loading status.
 /// </summary>
+[Authorize]
 public class IndexModel : PageModel
 {
     private readonly IManifestService _manifestService;

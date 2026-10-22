@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using AeroLink.Web.Models;
 using AeroLink.Web.Services;
@@ -45,6 +46,42 @@ public class IndexModel : PageModel
     {
         await LoadAsync();
         return FlightId.HasValue && Readiness is null ? NotFound() : Page();
+    }
+
+    /// <summary>Returns the current counts as JSON so the readiness card can refresh without a reload.</summary>
+    public async Task<IActionResult> OnGetStatusAsync()
+    {
+        if (!FlightId.HasValue) return BadRequest();
+        var readiness = await _closureService.GetReadinessAsync(FlightId.Value);
+        if (readiness is null) return NotFound();
+
+        return new JsonResult(new
+        {
+            expected = readiness.ExpectedCount,
+            loaded = readiness.LoadedCount,
+            approvedNotToLoad = readiness.ApprovedNotToLoadCount,
+            outstanding = readiness.OutstandingBags.Count,
+            openExceptions = readiness.OpenExceptions.Count,
+            canClose = readiness.CanClose,
+            completed = readiness.IsCompleted
+        });
+    }
+
+    /// <summary>Downloads the saved final summary of a completed flight as a CSV file.</summary>
+    public async Task<IActionResult> OnGetExportCsvAsync()
+    {
+        if (!FlightId.HasValue) return BadRequest();
+        var completion = await _closureService.GetCompletionAsync(FlightId.Value);
+        if (completion is null) return NotFound();
+
+        var summary = JsonSerializer.Deserialize<LoadingSummary>(completion.SummaryJson);
+        if (summary is null) return NotFound();
+
+        var flightName = new string(summary.FlightNumber.Where(char.IsLetterOrDigit).ToArray());
+        var bytes = Encoding.UTF8.GetPreamble()
+            .Concat(Encoding.UTF8.GetBytes(LoadingSummaryCsv.Build(summary, completion)))
+            .ToArray();
+        return File(bytes, "text/csv", $"loading-summary-{flightName}.csv");
     }
 
     /// <summary>Rechecks identity and readiness on the server, then redirects to the saved summary.</summary>

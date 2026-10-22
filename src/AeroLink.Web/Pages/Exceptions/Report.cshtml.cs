@@ -1,5 +1,6 @@
 using AeroLink.Web.Models;
 using AeroLink.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -11,6 +12,7 @@ namespace AeroLink.Web.Pages.Exceptions;
 /// it. The bag is flagged with an open exception, which blocks it from
 /// being loaded (see ExceptionService) until a Supervisor decides it (I5).
 /// </summary>
+[Authorize]
 public class ReportModel : PageModel
 {
     private readonly IManifestService _manifestService;

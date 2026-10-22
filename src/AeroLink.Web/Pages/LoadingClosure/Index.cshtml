@@ -31,7 +31,7 @@
     var completion = Model.Completion;
     <div class="card">
         <h2>Final loading summary — @summary.FlightNumber</h2>
-        <p class="alert-success">Completed — this loading record is read-only.</p>
+        <div class="closed-banner" role="status"><strong>Closed</strong> This loading record is complete and read-only.</div>
         <p>
             @summary.DepartureAirport → @summary.ArrivalAirport · Aircraft @summary.AircraftId<br />
             Scheduled departure: @summary.ScheduledDepartureUtc.ToString("dd MMM yyyy HH:mm 'UTC'")<br />
@@ -78,6 +78,7 @@
         }
         <p>
             <button class="btn btn-secondary" type="button" onclick="window.print()">Print summary</button>
+            <a class="btn btn-secondary" asp-page="/LoadingClosure/Index" asp-page-handler="ExportCsv" asp-route-flightId="@summary.FlightId">Download CSV</a>
             <a class="btn btn-secondary" asp-page="/Manifest/Index" asp-route-flightId="@summary.FlightId">Review manifest</a>
         </p>
     </div>
@@ -85,15 +86,38 @@
 else if (Model.Readiness is not null)
 {
     var status = Model.Readiness;
-    <div class="card">
+    var invariant = System.Globalization.CultureInfo.InvariantCulture;
+    var loadedPct = status.ExpectedCount > 0 ? status.LoadedCount * 100.0 / status.ExpectedCount : 0;
+    var approvedPct = status.ExpectedCount > 0 ? status.ApprovedNotToLoadCount * 100.0 / status.ExpectedCount : 0;
+    <div class="card" id="readiness-card"
+         data-status-url="@(Url.Page("/LoadingClosure/Index", "Status", new { flightId = status.Flight.FlightId }))"
+         data-view-url="@(Url.Page("/LoadingClosure/Index", new { flightId = status.Flight.FlightId }))">
         <h2>@status.Flight.FlightNumber — @status.Flight.DepartureAirport → @status.Flight.ArrivalAirport</h2>
+        @if (status.IsCompleted)
+        {
+            <div class="closed-banner" role="status"><strong>Closed</strong> This loading record is complete and read-only.</div>
+        }
         <dl>
-            <dt>Expected bags</dt><dd>@status.ExpectedCount</dd>
-            <dt>Loaded bags</dt><dd>@status.LoadedCount</dd>
-            <dt>Approved not to load</dt><dd>@status.ApprovedNotToLoadCount</dd>
-            <dt>Outstanding bags</dt><dd>@status.OutstandingBags.Count</dd>
-            <dt>Open exceptions</dt><dd>@status.OpenExceptions.Count</dd>
+            <dt>Expected bags</dt><dd id="stat-expected">@status.ExpectedCount</dd>
+            <dt>Loaded bags</dt><dd id="stat-loaded">@status.LoadedCount</dd>
+            <dt>Approved not to load</dt><dd id="stat-approved">@status.ApprovedNotToLoadCount</dd>
+            <dt>Outstanding bags</dt><dd id="stat-outstanding">@status.OutstandingBags.Count</dd>
+            <dt>Open exceptions</dt><dd id="stat-exceptions">@status.OpenExceptions.Count</dd>
         </dl>
+        <div class="progress-stack" role="img"
+             aria-label="@status.LoadedCount loaded, @status.ApprovedNotToLoadCount approved not to load, @status.OutstandingBags.Count outstanding">
+            <div class="seg seg-loaded" id="bar-loaded" style="width: @(loadedPct.ToString("0.##", invariant))%;"></div>
+            <div class="seg seg-approved" id="bar-approved" style="width: @(approvedPct.ToString("0.##", invariant))%;"></div>
+        </div>
+        <p class="progress-legend">
+            <span><span class="dot dot-loaded"></span>Loaded</span>
+            <span><span class="dot dot-approved"></span>Approved not to load</span>
+            <span><span class="dot dot-outstanding"></span>Outstanding</span>
+        </p>
+        @if (!status.IsCompleted)
+        {
+            <p class="live-note" id="live-note">Updates automatically every 5 seconds.</p>
+        }
 
         @if (status.IsCompleted)
         {
@@ -152,7 +176,7 @@ else if (Model.Readiness is not null)
                 <form method="post" asp-page-handler="Close">
                     <input type="hidden" name="FlightId" value="@status.Flight.FlightId" />
                     <p>Closing loading is final. Further baggage and exception changes will be blocked.</p>
-                    <button class="btn btn-primary" type="submit" disabled="@(!status.CanClose)">Close loading</button>
+                    <button class="btn btn-primary" type="submit" id="close-loading-button" disabled="@(!status.CanClose)">Close loading</button>
                 </form>
             }
             else
@@ -161,4 +185,56 @@ else if (Model.Readiness is not null)
             }
         }
     </div>
+
+    @if (!status.IsCompleted)
+    {
+        <script>
+            (function () {
+                var card = document.getElementById('readiness-card');
+                var statusUrl = card.dataset.statusUrl;
+                var viewUrl = card.dataset.viewUrl;
+                var note = document.getElementById('live-note');
+                var shown = {
+                    outstanding: @status.OutstandingBags.Count,
+                    openExceptions: @status.OpenExceptions.Count
+                };
+
+                function text(id, value) { document.getElementById(id).textContent = value; }
+                function pct(part, whole) { return whole > 0 ? (part * 100 / whole).toFixed(2) : '0'; }
+
+                async function refresh() {
+                    try {
+                        var response = await fetch(statusUrl, {
+                            headers: { 'Accept': 'application/json' },
+                            credentials: 'same-origin'
+                        });
+                        if (!response.ok) { throw new Error('Status ' + response.status); }
+                        var s = await response.json();
+
+                        // The blocker tables are rendered on the server, so reload the view when they change.
+                        if (s.completed || s.outstanding !== shown.outstanding || s.openExceptions !== shown.openExceptions) {
+                            window.location.assign(viewUrl);
+                            return;
+                        }
+
+                        text('stat-expected', s.expected);
+                        text('stat-loaded', s.loaded);
+                        text('stat-approved', s.approvedNotToLoad);
+                        text('stat-outstanding', s.outstanding);
+                        text('stat-exceptions', s.openExceptions);
+                        document.getElementById('bar-loaded').style.width = pct(s.loaded, s.expected) + '%';
+                        document.getElementById('bar-approved').style.width = pct(s.approvedNotToLoad, s.expected) + '%';
+
+                        var button = document.getElementById('close-loading-button');
+                        if (button) { button.disabled = !s.canClose; }
+                        note.textContent = 'Updates automatically every 5 seconds. Last updated ' + new Date().toLocaleTimeString() + '.';
+                    } catch (error) {
+                        note.textContent = 'Live updates are paused. Reload the page to try again.';
+                    }
+                }
+
+                setInterval(refresh, 5000);
+            })();
+        </script>
+    }
 }

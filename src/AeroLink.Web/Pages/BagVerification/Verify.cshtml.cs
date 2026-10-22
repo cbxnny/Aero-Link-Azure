@@ -1,5 +1,6 @@
 using AeroLink.Web.Models;
 using AeroLink.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,6 +13,7 @@ namespace AeroLink.Web.Pages.BagVerification;
 /// rejected without changing the loaded-bag count. Special bags require explicit
 /// acknowledgement of their handling instructions before confirmation.
 /// </summary>
+[Authorize]
 public class VerifyModel : PageModel
 {
     private readonly IManifestService _manifestService;

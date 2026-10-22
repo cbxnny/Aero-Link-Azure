@@ -122,7 +122,10 @@ public class BagVerificationService : IBagVerificationService
 
         if (!result.CanConfirmLoad || result.Bag is null)
         {
-            // Log rejection
+            // Nothing was changed, so end the transaction before logging. Otherwise the
+            // audit entry is saved inside it and discarded when the transaction is disposed.
+            await transaction.RollbackAsync();
+
             var rejectionReason = result.Outcome switch
             {
                 BagVerificationOutcome.InvalidTag => "Invalid tag",
