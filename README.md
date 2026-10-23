@@ -32,8 +32,8 @@ docs/                    Design carryover from Assignment 1, sprint notes
 
 | ID | Story | Owner |
 | --- | --- | --- |
-| I1 | View expected bags for a flight | Dinh (built) |
-| I2 | Verify bag tag and confirm loading | Dinh (built) |
+| I1 | View expected bags for a flight | Dinh (Ben) |
+| I2 | Verify bag tag and confirm loading | Dinh (Ben) |
 | I3 | Identify special baggage, require acknowledgement | Paul |
 | I4 | Report missing/damaged baggage exception | Owen |
 | I5 | Supervisor resolves exception / approves not-to-load | Owen |
@@ -47,10 +47,40 @@ Only `BG_Supervisor` users may decide exceptions, close loading, or view the
 audit log. HR startup instructions and verified employee examples are in
 [HR API setup](docs/HR-API-SETUP.md).
 
-## Branching
+## Branching and team contributions
 
-See `docs/BRANCHING.md`. For integrated baggage-handling rules, demo steps,
-and validation evidence, see [I3/I6 integration guide](docs/I3-I6-HANDOVER.md).
+`main` contains the integrated prototype. The team used individual work branches
+as well as branches for specific stories, fixes and shared tasks. The table
+records branch names and contribution evidence; it does not imply that every
+commit on an individual branch has been merged.
+
+| Team member | Individual stories | Recorded branches and contribution evidence |
+| --- | --- | --- |
+| Dinh (Ben) | I1: flight manifest; I2: bag verification and loading | `benTest`, `audit-fix`; manifest/verification and tests (`49dcc1b`), homepage/login (`5c3c3ef`), audit logging (`6cc9fcb`), live polling/CSV/closed-flight and audit fixes (`cb09e6b`). |
+| Owen | I4: report baggage exceptions; I5: Supervisor decisions | `Owen's-Work-Branch`; exception reporting, Supervisor decisions and tests (`31a8f3d`). The branch also contains a separate SVG icon update (`5d41cd9`) that is not yet integrated into `main`. |
+| Paul | I3: special-handling acknowledgement; I6: loading closure | Initial `paul-work` branch, followed by `feature/US2.5.1-special-baggage` and `feature/I6-close-loading`; shared-task branches `feature/T2-hr-api-login`, `fix/homepage-and-live-status` and `fix/elevair-branding`. |
+
+T1–T4 and shared UI, authentication, reporting and integration improvements were
+completed collaboratively. The individual story assignments above remain the
+same; Git history records the specific commits and their authors.
+
+The following review branches are now integrated into `main`:
+
+| Pull request | Branch | Integrated work |
+| --- | --- | --- |
+| [#1](https://github.com/cbxnny/Aero-Link-Azure/pull/1) | `feature/US2.5.1-special-baggage` | I3 acknowledgement and exception/loading integration guards |
+| [#2](https://github.com/cbxnny/Aero-Link-Azure/pull/2) | `feature/I6-close-loading` | I6 reconciliation, closure, saved summaries and completed-record protection |
+| [#3](https://github.com/cbxnny/Aero-Link-Azure/pull/3) | `fix/audit-and-auth-gaps` | Audit/authentication fixes and closure reporting improvements |
+| [#5](https://github.com/cbxnny/Aero-Link-Azure/pull/5) | `fix/homepage-and-live-status` | Signed-out homepage access and live blocker-detail refresh |
+| [#6](https://github.com/cbxnny/Aero-Link-Azure/pull/6) | `feature/T2-hr-api-login` | Supplied HR REST API login and current setup documentation |
+| [#7](https://github.com/cbxnny/Aero-Link-Azure/pull/7) | `fix/elevair-branding` | Elevair branding and project documentation |
+
+For new work, branch from an up-to-date `main`, use a story/task branch, make
+meaningful commits, and open a pull request for another member to review before
+merging. Link the story, commits and PR in Azure Boards where practical. See
+[branching conventions](docs/BRANCHING.md) for the workflow. For integrated
+baggage-handling rules, demo steps and validation evidence, see the
+[I3/I6 integration guide](docs/I3-I6-HANDOVER.md).
 
 ## Getting started
 
@@ -88,8 +118,9 @@ dotnet test
   approved-not-to-load bags, and completed flights.
 - **I3** - special bags display their category and supplied instructions.
   Loading requires an acknowledgement for that bag, checked by the server.
-- **I4/I5** - report problems and record Supervisor decisions. These existing
-  services now reject operational changes after I6 completes a flight.
+- **I4/I5** - report problems and record Supervisor decisions. Supervisors can
+  resolve an exception or approve a bag not to load, recording their decision
+  reason. Operational changes are rejected after I6 completes a flight.
 - **I6** - `Pages/LoadingClosure/Index.cshtml`: reconcile the selected manifest,
   identify outstanding bags/open exceptions, and let a signed-in Supervisor
   close a ready flight. A final summary records outcomes, decisions, completion
@@ -104,7 +135,9 @@ dotnet test
 - Unit tests in `tests/AeroLink.Tests` cover verification, acknowledgement,
   exceptions, decisions, closure, authorization, and completed-flight protection.
 
-The combined HR integration and `main` revision `167d44b` passed **129 tests**.
+The integrated application, including HR login and the homepage/live-status
+fixes, passed **129 tests**. These changes are on `main` following PR #6
+(merge commit `8e2f367`).
 HTTP checks against the supplied HR API covered valid and failed sign-in, role
 restrictions, baggage and exception workflows, closure, CSV export, audit
 records, logout, API unavailability and report persistence after restarting
@@ -112,7 +145,9 @@ the application. This does not replace visual browser review.
 
 ## Remaining review and demonstration steps
 
-- Review and merge this HR integration through its pull request.
+- Review the pending SVG icon update on Owen's branch and integrate it through
+  a pull request if the team chooses to include it.
 - Run both applications on the team's recording machine and review the pages
-  in a browser, including failed login, Handler/Supervisor access and I3/I6.
+  in a browser, including failed login, Handler/Supervisor access and all I1–I6
+  workflows.
 - Update Azure Boards and submission evidence, then rehearse the demonstration.
