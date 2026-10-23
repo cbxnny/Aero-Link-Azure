@@ -1,99 +1,83 @@
+using System.Globalization;
+using System.Net;
+using System.Net.Http.Json;
+using System.Net.Mail;
+using System.Text.Json;
 using AeroLink.Web.Models;
 
 namespace AeroLink.Web.Services;
 
-/// <summary>
-/// Simulates the airline HR System API specified in the assessment brief.
-/// Provides credential authentication and role verification for ground operations staff.
-/// </summary>
+/// <summary>Validates simulated login details against the supplied read-only HR REST API.</summary>
 public class AuthService : IAuthService
 {
-    private static readonly List<AppUser> SeedEmployees = new()
-    {
-        new AppUser
-        {
-            EmployeeId = "EMP-1001",
-            Username = "supervisor",
-            FullName = "Sarah Chen",
-            Role = "BG_Supervisor",
-            RoleDisplayName = "Baggage Supervisor",
-            Department = "Ramp Operations Supervision",
-            Password = "password123"
-        },
-        new AppUser
-        {
-            EmployeeId = "EMP-2001",
-            Username = "handler",
-            FullName = "David Miller",
-            Role = "BG_Handler",
-            RoleDisplayName = "Baggage Handler",
-            Department = "Ramp Baggage Crew A",
-            Password = "password123"
-        },
-        new AppUser
-        {
-            EmployeeId = "EMP-3001",
-            Username = "lead",
-            FullName = "Alex Taylor",
-            Role = "BG_Supervisor",
-            RoleDisplayName = "Ground Operations Lead",
-            Department = "Ground Operations Command",
-            Password = "password123"
-        }
-    };
+    private readonly HttpClient _httpClient;
+
+    /// <summary>Creates the service with the configured HR API HTTP client.</summary>
+    public AuthService(HttpClient httpClient) => _httpClient = httpClient;
 
     /// <inheritdoc />
-    public Task<AuthResult> AuthenticateAsync(string usernameOrEmployeeId, string password)
+    public async Task<AuthResult> AuthenticateAsync(string employeeId, string email)
     {
-        if (string.IsNullOrWhiteSpace(usernameOrEmployeeId))
+        var idText = (employeeId ?? string.Empty).Trim();
+        var emailText = (email ?? string.Empty).Trim();
+        if (!int.TryParse(idText, NumberStyles.None, CultureInfo.InvariantCulture, out var id) || id <= 0)
+            return new(false, "Enter a valid positive whole-number Employee ID.", null);
+
+        if (!MailAddress.TryCreate(emailText, out var address) ||
+            !string.Equals(address.Address, emailText, StringComparison.OrdinalIgnoreCase))
+            return new(false, "Enter a valid employee email address.", null);
+
+        try
         {
-            return Task.FromResult(new AuthResult(false, "Employee ID or Username is required.", null));
-        }
+            using var response = await _httpClient.GetAsync($"api/employees/{id}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return new(false, "Employee not found in the HR system.", null);
+            if (!response.IsSuccessStatusCode)
+                return new(false, "The HR system is unavailable. Please try again later.", null);
 
-        if (string.IsNullOrWhiteSpace(password))
+            var employee = await response.Content.ReadFromJsonAsync<HrEmployee>();
+            if (employee is null || employee.EmployeeId != id ||
+                string.IsNullOrWhiteSpace(employee.Email) || string.IsNullOrWhiteSpace(employee.JobTitle))
+                return new(false, "The HR system returned an invalid employee record. Please contact your team.", null);
+
+            if (!string.Equals(employee.Email.Trim(), emailText, StringComparison.OrdinalIgnoreCase))
+                return new(false, "The email address does not match this Employee ID.", null);
+
+            var role = employee.JobTitle.Trim() switch
+            {
+                var title when title.Equals("Baggage Handler", StringComparison.OrdinalIgnoreCase) => "BG_Handler",
+                var title when title.Equals("BG_Supervisor", StringComparison.OrdinalIgnoreCase) => "BG_Supervisor",
+                _ => null
+            };
+            if (role is null)
+                return new(false, "Only Baggage Handlers and Baggage Supervisors can access this module.", null);
+
+            var fullName = $"{employee.FirstName} {employee.LastName}".Trim();
+            return new(true, null, new AppUser
+            {
+                EmployeeId = id.ToString(CultureInfo.InvariantCulture),
+                Email = employee.Email.Trim(),
+                FullName = string.IsNullOrWhiteSpace(fullName) ? employee.Email.Trim() : fullName,
+                Role = role,
+                RoleDisplayName = role == "BG_Supervisor" ? "Baggage Supervisor" : "Baggage Handler",
+                Department = employee.DepartmentName ?? string.Empty
+            });
+        }
+        catch (HttpRequestException)
         {
-            return Task.FromResult(new AuthResult(false, "Password is required.", null));
+            return new(false, "Cannot connect to the HR system. Check that the HR API is running and try again.", null);
         }
-
-        var normalizedIdentifier = usernameOrEmployeeId.Trim();
-        var user = SeedEmployees.FirstOrDefault(u =>
-            string.Equals(u.Username, normalizedIdentifier, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(u.EmployeeId, normalizedIdentifier, StringComparison.OrdinalIgnoreCase));
-
-        if (user is null)
+        catch (OperationCanceledException)
         {
-            return Task.FromResult(new AuthResult(false, "Invalid employee ID or username. Staff record not found in HR system.", null));
+            return new(false, "The HR system did not respond in time. Please try again.", null);
         }
-
-        // Check password against HR record
-        if (!string.Equals(user.Password, password, StringComparison.Ordinal))
+        catch (JsonException)
         {
-            return Task.FromResult(new AuthResult(false, "Incorrect password. Please verify your credentials.", null));
+            return new(false, "The HR system returned an invalid employee record. Please contact your team.", null);
         }
-
-        return Task.FromResult(new AuthResult(true, null, user));
-    }
-
-    /// <inheritdoc />
-    public Task<IReadOnlyList<AppUser>> GetDemoUsersAsync()
-    {
-        IReadOnlyList<AppUser> list = SeedEmployees.AsReadOnly();
-        return Task.FromResult(list);
-    }
-
-    /// <inheritdoc />
-    public Task<AppUser?> FindUserAsync(string identifier)
-    {
-        if (string.IsNullOrWhiteSpace(identifier))
+        catch (NotSupportedException)
         {
-            return Task.FromResult<AppUser?>(null);
+            return new(false, "The HR system returned an unsupported response. Please contact your team.", null);
         }
-
-        var normalized = identifier.Trim();
-        var user = SeedEmployees.FirstOrDefault(u =>
-            string.Equals(u.Username, normalized, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(u.EmployeeId, normalized, StringComparison.OrdinalIgnoreCase));
-
-        return Task.FromResult(user);
     }
 }

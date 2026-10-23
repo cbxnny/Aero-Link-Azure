@@ -6,11 +6,11 @@ namespace AeroLink.Web.Models;
 /// </summary>
 public class AppUser
 {
-    /// <summary>Unique employee ID code (e.g., EMP-1001).</summary>
+    /// <summary>Numeric HR employee ID stored as text in the login claims (e.g., 100101).</summary>
     public string EmployeeId { get; set; } = string.Empty;
 
-    /// <summary>System username for login.</summary>
-    public string Username { get; set; } = string.Empty;
+    /// <summary>Email verified against the supplied HR employee record.</summary>
+    public string Email { get; set; } = string.Empty;
 
     /// <summary>Full display name of the staff member.</summary>
     public string FullName { get; set; } = string.Empty;
@@ -26,6 +26,4 @@ public class AppUser
     /// <summary>Department or operations crew assignment.</summary>
     public string Department { get; set; } = string.Empty;
 
-    /// <summary>Plaintext password or hash used for the dummy HR authentication.</summary>
-    public string Password { get; set; } = string.Empty;
 }

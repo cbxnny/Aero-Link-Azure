@@ -10,7 +10,7 @@ against the Module 5.2 user stories from Assignment 1.
 - Sprint 1: 18 September 2026 to 25 October 2026
 - Framework: ASP.NET Core Razor Pages
 - Database: SQLite (see `src/AeroLink.Web/Data`)
-- Auth: local demo accounts in `AuthService`; supplied HR API integration is a team task
+- Auth: Employee ID/email validated through the supplied HR REST API (see `docs/HR-API-SETUP.md`)
 
 ## Structure
 
@@ -40,12 +40,12 @@ docs/                    Design carryover from Assignment 1, sprint notes
 | I6 | Supervisor closes loading | Paul |
 
 Team-level stories (T1 to T4: main screen, login, logout, live status report)
-are built collaboratively. The integrated application includes the home page,
-local demo login/logout, loading-readiness polling, and an audit log.
-Operational pages require sign-in; only `BG_Supervisor` users may decide
-exceptions, close loading, or view the audit log. The public homepage still
-needs its operational information hidden before sign-in, and the supplied
-HR API integration remains outstanding.
+are built collaboratively. The integrated application includes a public welcome
+page, HR-backed login/logout, loading-readiness polling, and an audit log.
+Flight details and operational totals are available only after sign-in.
+Only `BG_Supervisor` users may decide exceptions, close loading, or view the
+audit log. HR startup instructions and verified employee examples are in
+[HR API setup](docs/HR-API-SETUP.md).
 
 ## Branching
 
@@ -54,7 +54,9 @@ and validation evidence, see [I3/I6 integration guide](docs/I3-I6-HANDOVER.md).
 
 ## Getting started
 
-Install the .NET 8 SDK, then run:
+Install the .NET 8 SDK and start the supplied HR System separately before
+logging in. Follow [HR API setup](docs/HR-API-SETUP.md) for the two-terminal
+startup commands and the Employee ID/email examples. Then start Elevair:
 
 ```sh
 cd src/AeroLink.Web
@@ -94,24 +96,23 @@ dotnet test
   time and Supervisor identity. Completed flights remain available for review,
   printing, and CSV download.
 - **Live readiness** - the loading-completion page polls current counts every
-  five seconds and reloads when outstanding/open-exception counts change or
-  loading completes. Closure always rechecks the current database state.
+  five seconds and reloads when blocker details change, even if their counts
+  stay unchanged, or loading completes. Failed updates disable the closure
+  button while polling retries. Closure always rechecks the current database state.
 - **Audit log** - Supervisors can review operational events such as sign-in,
   sign-out, bag loading/rejection, exception decisions, and loading closure.
 - Unit tests in `tests/AeroLink.Tests` cover verification, acknowledgement,
   exceptions, decisions, closure, authorization, and completed-flight protection.
 
-The latest reviewed `main` revision, `02175ad`, built successfully and passed
-**101 tests**. HTTP checks covered sign-in, role restrictions, baggage and
-exception workflows, closure, CSV export, audit records, and report persistence
-after restarting the application. This does not replace visual browser review.
+The combined HR integration and `main` revision `167d44b` passed **129 tests**.
+HTTP checks against the supplied HR API covered valid and failed sign-in, role
+restrictions, baggage and exception workflows, closure, CSV export, audit
+records, logout, API unavailability and report persistence after restarting
+the application. This does not replace visual browser review.
 
-## Team integration still to complete
+## Remaining review and demonstration steps
 
-- Replace local demo authentication with the supplied HR API integration and
-  the required Employee ID/email validation.
-- Hide flight details and operational totals on the signed-out homepage to
-  satisfy T1. The main entry page and module navigation can remain public.
-- Refresh live blocker details when the affected bags/exceptions change even
-  if their counts stay the same. Until fixed, manually reload the readiness
-  page to confirm those details. Server-side closure checks remain in place.
+- Review and merge this HR integration through its pull request.
+- Run both applications on the team's recording machine and review the pages
+  in a browser, including failed login, Handler/Supervisor access and I3/I6.
+- Update Azure Boards and submission evidence, then rehearse the demonstration.

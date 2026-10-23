@@ -47,14 +47,14 @@ available for review but cannot be changed.
   the completed-flight checks in both decision methods and exception reporting.
   The existing decision semantics and recorded reasons remain intact.
 - **Authentication:** retain authenticated `NameIdentifier` and role `BG_Supervisor` claims
-  when replacing demo login with the supplied HR API integration. I6 uses the
+  from the supplied HR API integration. I6 uses the
   server's authenticated principal, not a name or role submitted by a form.
 
-The current login uses local demo accounts. Supplied HR API integration and
-Employee ID/email validation remain a T2 team task. Manifest, verification,
-reporting, and readiness pages require authentication; Supervisor review and
-audit pages also require `BG_Supervisor`. The public homepage still exposes
-operational data and needs the remaining T1 access change.
+The current login validates Employee ID/email through the supplied HR API.
+See [HR API setup](HR-API-SETUP.md) for startup commands and verified teaching
+accounts. Manifest, verification, reporting and readiness pages require sign-in;
+Supervisor review and audit pages also require `BG_Supervisor`. The public
+homepage hides operational flight details and totals until sign-in.
 
 ## Database compatibility
 
@@ -70,15 +70,16 @@ no final summary is available; the app does not fabricate an earlier report.
 
 ## Run and demonstrate
 
-From the repository root, with the .NET 8 SDK installed:
+With the .NET 8 SDK installed, start the HR API in a separate terminal using
+[HR API setup](HR-API-SETUP.md). Then, from the Elevair repository root:
 
 ```powershell
 dotnet test
 dotnet run --project .\src\AeroLink.Web
 ```
 
-Open the address printed by the running app. Use the existing login page's
-demo accounts: a handler for normal baggage work, and a Supervisor for closure.
+Open the address printed by the running app. Sign in with the HR Employee ID
+and matching email: use a Handler for baggage work and a Supervisor for closure.
 Use an unfinished flight; closing is final. Do not delete shared demo data just
 to repeat the demonstration.
 
@@ -93,9 +94,8 @@ to repeat the demonstration.
 4. **Ready flight:** load the remaining bags, acknowledging each special bag.
    The readiness page shows expected, loaded, approved-not-to-load, outstanding,
    and open-exception counts. Counts are polled every five seconds. The view
-   reloads when outstanding/open-exception counts change or loading completes.
-   Manually refresh if exception details change without a count change; see
-   the remaining live-update issue below.
+   reloads when blocker details change, even if their counts stay unchanged,
+   or loading completes. If updates fail, closure is disabled while polling retries.
 5. **Role check:** a handler can review readiness but cannot close loading.
 6. **Closure:** as Supervisor, close loading. The final summary shows the flight,
    bag outcomes, exception decisions/reasons, completion time and Supervisor.
@@ -123,8 +123,8 @@ Black-box service tests use isolated SQLite databases and verify persisted data:
 - `AuditLogServiceTests` and `LoadingSummaryCsvTests`: audit records, filtering,
   and CSV formatting/export content.
 
-The original I3/I6 feature validation passed **84 tests**. The latest reviewed
-integrated `main`, commit `02175ad`, built and passed **101 tests**.
+The original I3/I6 feature validation passed **84 tests**. The combined HR
+integration and `main` revision `167d44b` built and passed **129 tests**.
 HTTP checks exercised anonymous/handler/Supervisor access, a complete
 ten-bag flight with nine loaded and one approved not to load, rejected later
 writes, CSV download, audit records, and retention of the final report after
@@ -132,18 +132,9 @@ restarting the application.
 Automated visual browser testing was unavailable; review the pages in a browser
 as part of the team demonstration.
 
-## Remaining integration issues
+## Remaining review and submission steps
 
-- Connect the supplied HR API and validate Employee ID/email against it (T2).
-- Hide operational flight details and totals from the public homepage until
-  sign-in (T1).
-- The readiness poll only detects blocker-table changes through counts. If one
-  open exception is resolved and another is raised between polls, the counts
-  can remain identical while the displayed bag details become stale. Manual
-  refresh retrieves the current details; closure independently rechecks the
-  database. Add a change marker or refreshed blocker data to complete this
-  aspect of the T4 live report.
-
-These documented gaps are separate from the completed I3/I6 rules and still
-need implementation and validation. Azure Boards updates, peer review, and
-the recorded presentation remain part of the team submission evidence.
+The HR API, homepage access and same-count blocker-refresh changes are included
+in this integration. Merge the HR PR after teammate review and run both systems
+on the recording machine. Azure Boards updates, peer review, and the recorded
+presentation remain part of the team submission evidence.
