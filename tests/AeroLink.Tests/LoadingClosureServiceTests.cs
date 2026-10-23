@@ -49,6 +49,71 @@ public class LoadingClosureServiceTests : IDisposable
         await loading.ConfirmLoadedAsync(1, "BAG-2", handlingAcknowledged: true);
     }
 
+    [Fact]
+    public async Task Readiness_ReplacementExceptionChangesRevisionEvenWithIdenticalCounts()
+    {
+        var original = new BaggageException { FlightId = 1, BagId = 1, Description = "Missing bag" };
+        _db.Exceptions.Add(original);
+        await _db.SaveChangesAsync();
+        var before = (await _sut.GetReadinessAsync(1))!;
+
+        original.Status = "Resolved";
+        _db.Exceptions.Add(new BaggageException { FlightId = 1, BagId = 2, Description = "Damaged bag" });
+        await _db.SaveChangesAsync();
+        var after = (await _sut.GetReadinessAsync(1))!;
+
+        Assert.Equal(before.OutstandingBags.Count, after.OutstandingBags.Count);
+        Assert.Equal(before.OpenExceptions.Count, after.OpenExceptions.Count);
+        Assert.NotEqual(before.Revision, after.Revision);
+    }
+
+    [Fact]
+    public async Task Readiness_EditedProblemChangesRevisionWithoutChangingExceptionIdentity()
+    {
+        var problem = new BaggageException { FlightId = 1, BagId = 1, Description = "Initial description" };
+        _db.Exceptions.Add(problem);
+        await _db.SaveChangesAsync();
+        var before = (await _sut.GetReadinessAsync(1))!;
+
+        problem.Description = "Updated handling problem";
+        await _db.SaveChangesAsync();
+        var after = (await _sut.GetReadinessAsync(1))!;
+
+        Assert.Equal(Assert.Single(before.OpenExceptions).ExceptionId, Assert.Single(after.OpenExceptions).ExceptionId);
+        Assert.NotEqual(before.Revision, after.Revision);
+    }
+
+    [Fact]
+    public async Task Readiness_ReplacingOutstandingBagChangesRevisionWithIdenticalTotals()
+    {
+        var first = await _db.Bags.FindAsync(1);
+        var second = await _db.Bags.FindAsync(2);
+        first!.Outcome = "Loaded";
+        await _db.SaveChangesAsync();
+        var before = (await _sut.GetReadinessAsync(1))!;
+
+        first.Outcome = "Pending";
+        second!.Outcome = "Loaded";
+        await _db.SaveChangesAsync();
+        var after = (await _sut.GetReadinessAsync(1))!;
+
+        Assert.Equal(before.LoadedCount, after.LoadedCount);
+        Assert.Equal(before.OutstandingBags.Count, after.OutstandingBags.Count);
+        Assert.NotEqual(before.Revision, after.Revision);
+    }
+
+    [Fact]
+    public async Task Readiness_StableAcrossRepeatedReadsAndUnrelatedFlightChanges()
+    {
+        var before = (await _sut.GetReadinessAsync(1))!;
+        var repeated = (await _sut.GetReadinessAsync(1))!;
+        Assert.Equal(before.Revision, repeated.Revision);
+
+        _db.Exceptions.Add(new BaggageException { FlightId = 2, BagId = 3, Description = "Other flight problem" });
+        await _db.SaveChangesAsync();
+        Assert.Equal(before.Revision, (await _sut.GetReadinessAsync(1))!.Revision);
+    }
+
     private async Task AssertUnchangedAsync()
     {
         Assert.Equal("NotStarted", (await _db.Flights.AsNoTracking().SingleAsync(f => f.FlightId == 1)).LoadingStatus);

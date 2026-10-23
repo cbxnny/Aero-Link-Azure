@@ -128,8 +128,8 @@ dotnet test --filter FullyQualifiedName~AuthServiceTests
 
 `AuthServiceTests` contains 31 cases using an in-process HTTP handler. They
 exercise the actual client request format and valid/invalid responses without
-depending on a running external service. The full suite passed **121 tests**
-after this integration.
+depending on a running external service. The combined HR integration and `main` revision `167d44b` passed **129 tests**,
+including the homepage access and live blocker-refresh regression cases.
 
 Two-application HTTP validation against the supplied HR service also confirmed:
 
@@ -151,7 +151,8 @@ team changes. Visual browser review is still needed on the team's recording setu
 
 ## Review and merge
 
-This is the T2 integration branch, separate from the Elevair branding review.
+This T2 integration branch includes the reviewed Elevair branding and
+homepage/live-status changes from `main`.
 The shared login interface now takes Employee ID/email instead of username/password;
 the authenticated identity no longer stores a password or demo username.
 Review `AuthService`, `IAuthService`, `AppUser`, the login page, the HTTP client
@@ -159,7 +160,6 @@ registration/configuration, and the updated tests together.
 
 No changes were made to the supplied HR source or to the I3/I6 loading rules.
 Existing baggage databases and completed records do not need to be reset.
-When reconciling documentation with the branding branch, retain this HR setup
-guide and replace the earlier handover's demo-login instructions with these
-current steps. The remaining T1 homepage-data and T4 same-count blocker-refresh
-issues are separate from this integration.
+The signed-out homepage hides operational information. Loading-readiness
+polling detects changed blocker details even when their counts stay unchanged.
+Review and merge this PR, then rehearse both systems together on the recording machine.

@@ -90,6 +90,7 @@ else if (Model.Readiness is not null)
     var loadedPct = status.ExpectedCount > 0 ? status.LoadedCount * 100.0 / status.ExpectedCount : 0;
     var approvedPct = status.ExpectedCount > 0 ? status.ApprovedNotToLoadCount * 100.0 / status.ExpectedCount : 0;
     <div class="card" id="readiness-card"
+         data-revision="@status.Revision"
          data-status-url="@(Url.Page("/LoadingClosure/Index", "Status", new { flightId = status.Flight.FlightId }))"
          data-view-url="@(Url.Page("/LoadingClosure/Index", new { flightId = status.Flight.FlightId }))">
         <h2>@status.Flight.FlightNumber — @status.Flight.DepartureAirport → @status.Flight.ArrivalAirport</h2>
@@ -194,10 +195,7 @@ else if (Model.Readiness is not null)
                 var statusUrl = card.dataset.statusUrl;
                 var viewUrl = card.dataset.viewUrl;
                 var note = document.getElementById('live-note');
-                var shown = {
-                    outstanding: @status.OutstandingBags.Count,
-                    openExceptions: @status.OpenExceptions.Count
-                };
+                var shownRevision = card.dataset.revision;
 
                 function text(id, value) { document.getElementById(id).textContent = value; }
                 function pct(part, whole) { return whole > 0 ? (part * 100 / whole).toFixed(2) : '0'; }
@@ -206,13 +204,14 @@ else if (Model.Readiness is not null)
                     try {
                         var response = await fetch(statusUrl, {
                             headers: { 'Accept': 'application/json' },
-                            credentials: 'same-origin'
+                            credentials: 'same-origin',
+                            cache: 'no-store'
                         });
                         if (!response.ok) { throw new Error('Status ' + response.status); }
                         var s = await response.json();
 
                         // The blocker tables are rendered on the server, so reload the view when they change.
-                        if (s.completed || s.outstanding !== shown.outstanding || s.openExceptions !== shown.openExceptions) {
+                        if (s.completed || s.revision !== shownRevision) {
                             window.location.assign(viewUrl);
                             return;
                         }
@@ -229,7 +228,9 @@ else if (Model.Readiness is not null)
                         if (button) { button.disabled = !s.canClose; }
                         note.textContent = 'Updates automatically every 5 seconds. Last updated ' + new Date().toLocaleTimeString() + '.';
                     } catch (error) {
-                        note.textContent = 'Live updates are paused. Reload the page to try again.';
+                        var button = document.getElementById('close-loading-button');
+                        if (button) { button.disabled = true; }
+                        note.textContent = 'Unable to refresh loading status. Retrying automatically every 5 seconds.';
                     }
                 }
 
