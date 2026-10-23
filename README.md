@@ -1,6 +1,7 @@
-# AeroLink Ground Services - Baggage Handling Module
+# Elevair - Baggage Handling Module
 
-IAB251 Assessment 2 prototype. Working ASP.NET Core Razor implementation of the
+Elevair is the IAB251 Assessment 2 prototype for AeroLink Ground Services.
+It is an ASP.NET Core Razor implementation of the
 Departure Baggage Loading Verification and Exception Management workflow, built
 against the Module 5.2 user stories from Assignment 1.
 
@@ -16,7 +17,7 @@ against the Module 5.2 user stories from Assignment 1.
 ```
 src/AeroLink.Web/      Razor Pages web app
   Pages/                One folder per functional area (Manifest, BagVerification,
-                         Exceptions, SupervisorReview, LoadingClosure, Shared)
+                         Exceptions, SupervisorReview, LoadingClosure, AuditLog, Shared)
   Models/                Domain and view models
   Services/              Business logic / HR API client
   Data/                  DbContext, seed data, additive SQLite schema setup
@@ -39,19 +40,23 @@ docs/                    Design carryover from Assignment 1, sprint notes
 | I6 | Supervisor closes loading | Paul |
 
 Team-level stories (T1 to T4: main screen, login, logout, live status report)
-are built collaboratively. This branch includes the home page, local demo
-login/logout, and Paul's I3/I6 work. The I6 page requires sign-in and only
-`BG_Supervisor` users may close loading. The supplied HR API integration and
-the full T4 live report remain separate team work.
+are built collaboratively. The integrated application includes the home page,
+local demo login/logout, loading-readiness polling, and an audit log.
+Operational pages require sign-in; only `BG_Supervisor` users may decide
+exceptions, close loading, or view the audit log. The public homepage still
+needs its operational information hidden before sign-in, and the supplied
+HR API integration remains outstanding.
 
 ## Branching
 
-See `docs/BRANCHING.md`. For Paul's feature branches, demo steps, and integration
-review, see [I3/I6 handover](docs/I3-I6-HANDOVER.md).
+See `docs/BRANCHING.md`. For integrated baggage-handling rules, demo steps,
+and validation evidence, see [I3/I6 integration guide](docs/I3-I6-HANDOVER.md).
 
 ## Getting started
 
-```
+Install the .NET 8 SDK, then run:
+
+```sh
 cd src/AeroLink.Web
 dotnet restore
 dotnet run
@@ -59,9 +64,10 @@ dotnet run
 
 The SQLite database is created and seeded automatically on first run from
 `Data/Seed/baggage-manifest.json` (exported from the supplied
-`IAB251_Synthetic_Baggage_Manifest.xlsx`). Startup adds the I6
-`LoadingCompletions` table to existing databases without deleting their data.
-Deleting `aerolink.db` resets local demo data; it is not required for this update.
+`IAB251_Synthetic_Baggage_Manifest.xlsx`). Startup adds missing `Exceptions`,
+`LoadingCompletions`, and `AuditLog` tables to existing databases without deleting
+their data. Deleting `aerolink.db` resets local demo data and is not needed for
+these updates.
 
 Run tests from the repo root:
 
@@ -85,13 +91,27 @@ dotnet test
 - **I6** - `Pages/LoadingClosure/Index.cshtml`: reconcile the selected manifest,
   identify outstanding bags/open exceptions, and let a signed-in Supervisor
   close a ready flight. A final summary records outcomes, decisions, completion
-  time and Supervisor identity. Completed flights remain available for review.
+  time and Supervisor identity. Completed flights remain available for review,
+  printing, and CSV download.
+- **Live readiness** - the loading-completion page polls current counts every
+  five seconds and reloads when outstanding/open-exception counts change or
+  loading completes. Closure always rechecks the current database state.
+- **Audit log** - Supervisors can review operational events such as sign-in,
+  sign-out, bag loading/rejection, exception decisions, and loading closure.
 - Unit tests in `tests/AeroLink.Tests` cover verification, acknowledgement,
   exceptions, decisions, closure, authorization, and completed-flight protection.
+
+The latest reviewed `main` revision, `02175ad`, built successfully and passed
+**101 tests**. HTTP checks covered sign-in, role restrictions, baggage and
+exception workflows, closure, CSV export, audit records, and report persistence
+after restarting the application. This does not replace visual browser review.
 
 ## Team integration still to complete
 
 - Replace local demo authentication with the supplied HR API integration and
-  confirm access rules across the other operational pages.
-- Complete the T4 live loading-status workflow. The I6 readiness page refreshes
-  when requested and rechecks data on closure; it does not auto-refresh.
+  the required Employee ID/email validation.
+- Hide flight details and operational totals on the signed-out homepage to
+  satisfy T1. The main entry page and module navigation can remain public.
+- Refresh live blocker details when the affected bags/exceptions change even
+  if their counts stay the same. Until fixed, manually reload the readiness
+  page to confirm those details. Server-side closure checks remain in place.
