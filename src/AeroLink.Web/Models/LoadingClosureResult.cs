@@ -1,3 +1,6 @@
+using System.Security.Cryptography;
+using System.Text.Json;
+
 namespace AeroLink.Web.Models;
 
 /// <summary>Current baggage reconciliation for a selected departure flight.</summary>
@@ -33,6 +36,20 @@ public class LoadingReadiness
     /// for and no open exceptions. An empty manifest requires investigation.
     /// </summary>
     public bool CanClose => !IsCompleted && ExpectedCount > 0 && OutstandingBags.Count == 0 && OpenExceptions.Count == 0;
+
+    /// <summary>Changes whenever the displayed readiness or blocker details change.</summary>
+    public string Revision => Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new
+    {
+        Flight.FlightId,
+        Flight.LoadingStatus,
+        ExpectedCount,
+        LoadedCount,
+        ApprovedNotToLoadCount,
+        Bags = OutstandingBags.OrderBy(b => b.BagId)
+            .Select(b => new { b.BagId, b.Tag, b.HandlingType, b.Outcome }),
+        Exceptions = OpenExceptions.OrderBy(e => e.ExceptionId)
+            .Select(e => new { e.ExceptionId, e.BagId, Tag = e.Bag?.Tag, e.Category, e.Description })
+    })));
 }
 
 /// <summary>Read-only data captured for the final loading summary.</summary>
