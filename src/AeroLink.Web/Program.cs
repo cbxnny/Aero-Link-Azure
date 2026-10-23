@@ -17,11 +17,18 @@ builder.Services.AddScoped<IBagVerificationService, BagVerificationService>();
 builder.Services.AddScoped<IExceptionService, ExceptionService>();
 builder.Services.AddScoped<ISupervisorReviewService, SupervisorReviewService>();
 builder.Services.AddScoped<ILoadingClosureService, LoadingClosureService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
+{
+    var baseUrl = builder.Configuration["HrApi:BaseUrl"] ?? "http://localhost:5000/";
+    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
 
 builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
+        // Require a new HR-validated sign-in instead of reusing an old demo-login cookie.
+        options.Cookie.Name = "Elevair.HrSession";
         options.LoginPath = "/Login";
         options.LogoutPath = "/Logout";
         options.AccessDeniedPath = "/Login";
