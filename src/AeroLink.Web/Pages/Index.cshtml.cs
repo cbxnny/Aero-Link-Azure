@@ -1,5 +1,6 @@
 using AeroLink.Web.Data;
 using AeroLink.Web.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace AeroLink.Web.Pages;
 /// Aggregates real-time baggage stats, flight status, and directs handlers and supervisors
 /// to their designated workflow modules (Stories T1, I1-I5).
 /// </summary>
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class IndexModel : PageModel
 {
     private readonly AeroLinkDbContext _db;
@@ -40,6 +42,10 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
+        // Keep the entry page public without querying or exposing operational
+        // records until the employee has signed in.
+        if (User.Identity?.IsAuthenticated != true) return;
+
         TotalFlights = await _db.Flights.CountAsync();
         TotalBags = await _db.Bags.CountAsync();
         LoadedBags = await _db.Bags.CountAsync(b => b.Outcome == "Loaded");
