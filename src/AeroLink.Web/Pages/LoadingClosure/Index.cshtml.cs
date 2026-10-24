@@ -10,6 +10,7 @@ namespace AeroLink.Web.Pages.LoadingClosure;
 
 /// <summary>Displays loading readiness and saved summaries; only Supervisors may submit closure.</summary>
 [Authorize]
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 public class IndexModel : PageModel
 {
     private readonly IManifestService _manifestService;
@@ -63,7 +64,8 @@ public class IndexModel : PageModel
             outstanding = readiness.OutstandingBags.Count,
             openExceptions = readiness.OpenExceptions.Count,
             canClose = readiness.CanClose,
-            completed = readiness.IsCompleted
+            completed = readiness.IsCompleted,
+            revision = readiness.Revision
         });
     }
 

@@ -15,8 +15,8 @@
         <div class="hero-content">
             <div class="hero-meta">
             </div>
-            <h1>AeroLink Ground Services</h1>
-            <p class="hero-subtitle">Departure Baggage Loading Verification & Exception Management System</p>
+            <h1>Elevair</h1>
+            <p class="hero-subtitle">For AeroLink Ground Services &middot; Departure Baggage Loading Verification & Exception Management System</p>
             
             <div class="user-greeting-banner">
                 @if (isAuthenticated)
@@ -35,7 +35,7 @@
                 {
                     <div class="guest-banner">
                         <span class="status-indicator guest"></span>
-                        <span>Browsing in <strong>Guest Mode</strong>. Sign in with staff credentials for supervisor authorization.</span>
+                        <span>Browsing in <strong>Guest Mode</strong>. Sign in with your employee details to access operational functions.</span>
                         <a href="/Login" class="btn btn-sm btn-accent">Sign In</a>
                     </div>
                 }
@@ -43,7 +43,9 @@
         </div>
     </div>
 
-<!-- Live Operational Stats Metrics -->
+    @if (isAuthenticated)
+    {
+    <!-- Live Operational Stats Metrics -->
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="metric-icon">
@@ -202,4 +204,18 @@
             </tbody>
         </table>
     </div>
+    }
+    else
+    {
+        <div class="card">
+            <h2>Operational modules</h2>
+            <p>Sign in to access your available modules and operational information.</p>
+            <ul>
+                <li>Turnaround Planning and Resource Allocation</li>
+                <li>Baggage Unloading, Transfer and Loading Management</li>
+                <li>Departure Readiness and Turnaround Completion</li>
+            </ul>
+            <a href="/Login" class="btn btn-primary">Sign In</a>
+        </div>
+    }
 </div>
