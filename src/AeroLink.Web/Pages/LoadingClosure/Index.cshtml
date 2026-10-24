@@ -17,6 +17,7 @@
             }
         </select>
         <button class="btn btn-primary" type="submit">View loading status</button>
+        <a class="btn btn-secondary" asp-page="/LoadingClosure/Index" asp-page-handler="ExportCsv">Export all loading records (CSV)</a>
     </form>
 </div>
 
@@ -123,6 +124,9 @@ else if (Model.Readiness is not null)
         @if (status.IsCompleted)
         {
             <p class="alert-error">This flight is already completed and read-only. No saved final summary is available for this older record.</p>
+            <p>
+                <a class="btn btn-secondary" asp-page="/LoadingClosure/Index" asp-page-handler="ExportCsv" asp-route-flightId="@status.Flight.FlightId">Download loading records (CSV)</a>
+            </p>
         }
         else
         {
@@ -167,6 +171,7 @@ else if (Model.Readiness is not null)
             <p>
                 <a class="btn btn-secondary" asp-page="/Manifest/Index" asp-route-flightId="@status.Flight.FlightId">Review manifest</a>
                 <a class="btn btn-secondary" asp-page="/BagVerification/Verify" asp-route-flightId="@status.Flight.FlightId">Verify bags</a>
+                <a class="btn btn-secondary" asp-page="/LoadingClosure/Index" asp-page-handler="ExportCsv" asp-route-flightId="@status.Flight.FlightId">Download loading records (CSV)</a>
                 @if (User.IsInRole("BG_Supervisor"))
                 {
                     <a class="btn btn-secondary" asp-page="/SupervisorReview/Index">Review exceptions</a>

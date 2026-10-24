@@ -69,22 +69,49 @@ public class IndexModel : PageModel
         });
     }
 
-    /// <summary>Downloads the saved final summary of a completed flight as a CSV file.</summary>
+    /// <summary>Downloads loading records as a CSV file: completed summary, live records for uncompleted flights, or all flights.</summary>
     public async Task<IActionResult> OnGetExportCsvAsync()
     {
-        if (!FlightId.HasValue) return BadRequest();
-        var completion = await _closureService.GetCompletionAsync(FlightId.Value);
-        if (completion is null) return NotFound();
+        if (FlightId.HasValue)
+        {
+            var completion = await _closureService.GetCompletionAsync(FlightId.Value);
+            if (completion is not null && !string.IsNullOrWhiteSpace(completion.SummaryJson))
+            {
+                var summary = JsonSerializer.Deserialize<LoadingSummary>(completion.SummaryJson);
+                if (summary is not null)
+                {
+                    var flightName = new string(summary.FlightNumber.Where(char.IsLetterOrDigit).ToArray());
+                    var bytes = Encoding.UTF8.GetPreamble()
+                        .Concat(Encoding.UTF8.GetBytes(LoadingSummaryCsv.Build(summary, completion)))
+                        .ToArray();
+                    return File(bytes, "text/csv", $"loading-summary-{flightName}.csv");
+                }
+            }
 
-        var summary = JsonSerializer.Deserialize<LoadingSummary>(completion.SummaryJson);
-        if (summary is null) return NotFound();
+            var readiness = await _closureService.GetReadinessAsync(FlightId.Value);
+            if (readiness is null) return NotFound();
 
-        var flightName = new string(summary.FlightNumber.Where(char.IsLetterOrDigit).ToArray());
-        var bytes = Encoding.UTF8.GetPreamble()
-            .Concat(Encoding.UTF8.GetBytes(LoadingSummaryCsv.Build(summary, completion)))
+            var safeFlightName = new string(readiness.Flight.FlightNumber.Where(char.IsLetterOrDigit).ToArray());
+            var liveBytes = Encoding.UTF8.GetPreamble()
+                .Concat(Encoding.UTF8.GetBytes(LoadingSummaryCsv.Build(readiness)))
+                .ToArray();
+            return File(liveBytes, "text/csv", $"loading-records-{safeFlightName}.csv");
+        }
+
+        var flights = await _manifestService.GetFlightsAsync();
+        var allFlightsWithBags = new List<Flight>();
+        foreach (var f in flights)
+        {
+            var flightWithBags = await _manifestService.GetFlightWithBagsAsync(f.FlightId);
+            if (flightWithBags is not null) allFlightsWithBags.Add(flightWithBags);
+        }
+
+        var allBytes = Encoding.UTF8.GetPreamble()
+            .Concat(Encoding.UTF8.GetBytes(LoadingSummaryCsv.BuildAll(allFlightsWithBags)))
             .ToArray();
-        return File(bytes, "text/csv", $"loading-summary-{flightName}.csv");
+        return File(allBytes, "text/csv", "all-loading-records.csv");
     }
+
 
     /// <summary>Rechecks identity and readiness on the server, then redirects to the saved summary.</summary>
     public async Task<IActionResult> OnPostCloseAsync()

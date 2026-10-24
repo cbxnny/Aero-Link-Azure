@@ -90,4 +90,98 @@ public class LoadingSummaryCsvTests
         Assert.DoesNotContain(",=1+1", csv);
         Assert.DoesNotContain(",@SUM", csv);
     }
+
+    [Fact]
+    public void Build_WithLoadingReadiness_ExportsUncompletedFlight()
+    {
+        var flight = new Flight
+        {
+            FlightId = 2,
+            FlightNumber = "DEMO202",
+            DepartureAirport = "BNE",
+            ArrivalAirport = "MEL",
+            AircraftId = "VH-XYZ",
+            ScheduledDepartureUtc = new DateTime(2026, 10, 21, 10, 0, 0, DateTimeKind.Utc),
+            LoadingStatus = "InProgress",
+            Bags = new List<Bag>
+            {
+                new() { BagId = 1, Tag = "BAG-A", HandlingType = "Standard", Outcome = "Loaded", LoadedAtUtc = new DateTime(2026, 10, 21, 9, 30, 0, DateTimeKind.Utc) },
+                new() { BagId = 2, Tag = "BAG-B", HandlingType = "Fragile", Outcome = "Pending" }
+            }
+        };
+
+        var readiness = new LoadingReadiness
+        {
+            Flight = flight,
+            Exceptions = new List<BaggageException>
+            {
+                new()
+                {
+                    ExceptionId = 1,
+                    BagId = 2,
+                    Bag = flight.Bags[1],
+                    Category = "DamagedBag",
+                    Description = "Broken zipper",
+                    Status = "Open"
+                }
+            }
+        };
+
+        var csv = LoadingSummaryCsv.Build(readiness);
+        var lines = csv.Split("\r\n");
+
+        Assert.Contains("Flight,DEMO202", lines);
+        Assert.Contains("Loading status,InProgress", lines);
+        Assert.Contains("Expected bags,2", lines);
+        Assert.Contains("Loaded bags,1", lines);
+        Assert.Contains("Outstanding bags,1", lines);
+        Assert.Contains("Open exceptions,1", lines);
+        Assert.Contains("BAG-A,Standard,Loaded,2026-10-21 09:30:00", lines);
+        Assert.Contains("BAG-B,Fragile,Pending,", lines);
+        Assert.Contains("BAG-B,DamagedBag,Broken zipper,Open,,,", lines);
+    }
+
+    [Fact]
+    public void BuildAll_ExportsAllFlightsLoadingRecords()
+    {
+        var flights = new List<Flight>
+        {
+            new()
+            {
+                FlightId = 1,
+                FlightNumber = "QF100",
+                DepartureAirport = "BNE",
+                ArrivalAirport = "SYD",
+                AircraftId = "VH-AAA",
+                LoadingStatus = "InProgress",
+                ScheduledDepartureUtc = new DateTime(2026, 10, 21, 8, 0, 0, DateTimeKind.Utc),
+                Bags = new List<Bag>
+                {
+                    new() { Tag = "QF-1", HandlingType = "Standard", Outcome = "Loaded", LoadedAtUtc = new DateTime(2026, 10, 21, 7, 50, 0, DateTimeKind.Utc) }
+                }
+            },
+            new()
+            {
+                FlightId = 2,
+                FlightNumber = "QF200",
+                DepartureAirport = "BNE",
+                ArrivalAirport = "MEL",
+                AircraftId = "VH-BBB",
+                LoadingStatus = "NotStarted",
+                ScheduledDepartureUtc = new DateTime(2026, 10, 21, 9, 0, 0, DateTimeKind.Utc),
+                Bags = new List<Bag>
+                {
+                    new() { Tag = "QF-2", HandlingType = "Fragile", Outcome = "Pending" }
+                }
+            }
+        };
+
+        var csv = LoadingSummaryCsv.BuildAll(flights);
+        var lines = csv.Split("\r\n");
+
+        Assert.Contains("Flight,Route,Aircraft,Scheduled departure (UTC),Loading status,Bag tag,Handling category,Special handling,Outcome,Loaded at (UTC)", lines);
+        Assert.Contains("QF100,BNE to SYD,VH-AAA,2026-10-21 08:00:00,InProgress,QF-1,Standard,No,Loaded,2026-10-21 07:50:00", lines);
+        Assert.Contains("QF200,BNE to MEL,VH-BBB,2026-10-21 09:00:00,NotStarted,QF-2,Fragile,Yes,Pending,", lines);
+    }
 }
+
